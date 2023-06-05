@@ -38,7 +38,7 @@ func service() string {
 func getOriginalURL(c *gin.Context) {
 	shortened := c.Param("id")
 	answer := data[shortened]
-	c.Data(http.StatusTemporaryRedirect, "", []byte(answer))
+	c.Redirect(http.StatusTemporaryRedirect, answer)
 }
 
 func main() {
