@@ -20,8 +20,6 @@ func createShortened(c *gin.Context) {
 	shortened := service()
 	data[shortened] = string(body)
 	c.Data(http.StatusOK, "", []byte(BaseURL + shortened))
-
-	return
 }
 
 func service() string {
