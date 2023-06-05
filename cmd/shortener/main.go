@@ -19,7 +19,7 @@ func createShortened(c *gin.Context) {
 	body, _ := c.GetRawData()
 	shortened := service()
 	data[shortened] = string(body)
-	c.Data(http.StatusOK, "", []byte(BaseURL + shortened))
+	c.Data(http.StatusCreated, "", []byte(BaseURL + shortened))
 }
 
 func service() string {
