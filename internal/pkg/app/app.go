@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-
+	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
 	"github.com/april1858/shortener-gin/internal/app/service"
 )
 
 type App struct {
 	e *endpoint.Endpoint
+	rep *repository.Repository
 	s *service.Service
 	r *gin.Engine
 }
@@ -18,7 +19,9 @@ type App struct {
 func New() (*App, error) {
 	a := &App{}
 
-	a.s = service.New()
+	a.rep = repository.New()
+
+	a.s = service.New(a.rep)
 
 	a.e = endpoint.New(a.s)
 

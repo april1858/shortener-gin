@@ -5,19 +5,35 @@ import (
 	"encoding/hex"
 )
 
+type Repository interface {
+	Store(string, string)
+	Find(string) (string, error)
+}
+
 type Service struct {
+	R Repository
 }
 
-func New() *Service {
-	return &Service{}
+func New(r Repository) *Service {
+	return &Service{
+		R: r,
+	}
 }
 
-func (s *Service) CreatorShortened() string {
+func (s *Service) CreatorShortened(originalURL string) string {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
-		return "error in createCode()"
+		return "error in CreatorShortened()"
 	}
 
+	s.R.Store(hex.EncodeToString(b), originalURL)
+
 	return hex.EncodeToString(b)
+}
+
+func (s *Service) FindOriginalURL(shortened string) (string, error) {
+	answer, err := s.R.Find(shortened)
+	
+	return answer, err
 }
