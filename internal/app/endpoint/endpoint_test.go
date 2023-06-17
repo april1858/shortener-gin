@@ -45,7 +45,7 @@ func TestCreateSortened(t *testing.T) {
 			name: "second",
 			want: want{
 				code:        400,
-				originalURL: "jaja",
+				originalURL: "oh no",
 			},
 		},
 	}
