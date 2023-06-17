@@ -27,7 +27,7 @@ func (r *Repository) Find(short string) (string, error) {
 	defer r.mx.Unlock()
 	_, ok := r.M[short]
 	if !ok {
-		return "", errors.New("Not found ...")
+		return "", errors.New("Not found!")
 	}else{
 		return r.M[short], nil
 	}
