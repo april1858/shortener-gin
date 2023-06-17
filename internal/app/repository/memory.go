@@ -31,4 +31,4 @@ func (r *Repository) Find(short string) (string, error) {
 	}else{
 		return r.M[short], nil
 	}
-}cd
+}
