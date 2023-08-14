@@ -19,7 +19,7 @@ var (
 	//D = flag.String("d", "", "database_dsn")
 )
 
-var cnf Config
+var Cnf Config
 
 func New() *Config {
 
@@ -42,7 +42,7 @@ func New() *Config {
 
 	if b == "" {
 		if *B == "" {
-			baseurl = "http://localhost" + ":" + address
+			baseurl = "http://localhost" + ":" + address + "/"
 		} else {
 			baseurl = *B
 		}
@@ -60,9 +60,9 @@ func New() *Config {
 		file = f
 	}
 
-	cnf.BaseURL = baseurl
-	cnf.ServerAddress = address
-	cnf.FileStoragePath = file
+	Cnf.BaseURL = baseurl
+	Cnf.ServerAddress = address
+	Cnf.FileStoragePath = file
 
-	return &cnf
+	return &Cnf
 }
