@@ -42,7 +42,7 @@ func New() *Config {
 
 	if b == "" {
 		if *B == "" {
-			baseurl = "http://" + address + "/"
+			baseurl = "http://" + address
 		} else {
 			baseurl = *B
 		}
@@ -60,7 +60,7 @@ func New() *Config {
 		file = f
 	}
 
-	Cnf.BaseURL = baseurl
+	Cnf.BaseURL = baseurl + "/"
 	Cnf.ServerAddress = address
 	Cnf.FileStoragePath = file
 
