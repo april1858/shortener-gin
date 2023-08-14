@@ -42,7 +42,7 @@ func New() *Config {
 
 	if b == "" {
 		if *B == "" {
-			baseurl = "http://localhost" + ":" + address + "/"
+			baseurl = "http://localhost:8080"
 		} else {
 			baseurl = *B
 		}
