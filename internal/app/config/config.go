@@ -32,7 +32,7 @@ func New() *Config {
 
 	if a == "" {
 		if *A == "" {
-			address = "localhost:8080"
+			address = "localhost:8080/"
 		} else {
 			address = *A
 		}
