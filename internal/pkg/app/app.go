@@ -40,7 +40,7 @@ func New() (*App, error) {
 
 func (a *App) Run() error {
 	fmt.Println("server running. PORT :" + a.c.ServerAddress)
-	a.rr.Run(a.c.ServerAddress)
+	a.rr.Run(":" + a.c.ServerAddress)
 
 	return nil
 }
