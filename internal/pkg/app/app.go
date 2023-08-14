@@ -3,39 +3,43 @@ package app
 import (
 	"fmt"
 
-	"github.com/gin-gonic/gin"
-	"github.com/april1858/shortener-gin/internal/app/repository"
+	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
+	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
+	"github.com/gin-gonic/gin"
 )
 
 type App struct {
-	e *endpoint.Endpoint
-	rep *repository.Repository
-	s *service.Service
-	r *gin.Engine
+	e  *endpoint.Endpoint
+	ry *repository.Repository
+	s  *service.Service
+	rr *gin.Engine
+	c  *config.Config
 }
 
 func New() (*App, error) {
 	a := &App{}
 
-	a.rep = repository.New()
+	a.c = config.New()
 
-	a.s = service.New(a.rep)
+	a.ry = repository.New()
+
+	a.s = service.New(a.ry)
 
 	a.e = endpoint.New(a.s)
 
-	a.r = gin.Default()
+	a.rr = gin.Default()
 
-	a.r.POST("/", a.e.CreateShortened)
-	a.r.GET("/:id", a.e.GetOriginalURL)
+	a.rr.POST("/", a.e.CreateShortened)
+	a.rr.GET("/:id", a.e.GetOriginalURL)
 
 	return a, nil
 }
 
 func (a *App) Run() error {
-	fmt.Println("server running")
-	a.r.Run(":8080")
+	fmt.Println("server running. PORT :" + a.c.ServerAddress)
+	a.rr.Run(":" + a.c.ServerAddress)
 
 	return nil
 }
