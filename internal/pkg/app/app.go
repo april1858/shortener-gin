@@ -32,7 +32,7 @@ func New() (*App, error) {
 	a.rr = gin.Default()
 
 	a.rr.POST("/", a.e.CreateShortened)
-	a.rr.POST("/api/shorten", a.e.JsonCreateShortened)
+	a.rr.POST("/api/shorten", a.e.JSONCreateShortened)
 	a.rr.GET("/:id", a.e.GetOriginalURL)
 
 	return a, nil

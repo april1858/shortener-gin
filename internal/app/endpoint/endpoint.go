@@ -52,7 +52,7 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 	}
 }
 
-func (e *Endpoint) JsonCreateShortened(c *gin.Context) {
+func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	var shortened string
 	objQuery := make(map[string]string)
 	requestBody, _ := c.GetRawData()
