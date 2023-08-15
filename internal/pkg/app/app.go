@@ -7,6 +7,7 @@ import (
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,7 @@ func New() (*App, error) {
 
 	a.rr = gin.Default()
 
+	a.rr.Use(gzip.Gzip(gzip.DefaultCompression))
 	a.rr.POST("/", a.e.CreateShortened)
 	a.rr.POST("/api/shorten", a.e.JSONCreateShortened)
 	a.rr.GET("/:id", a.e.GetOriginalURL)
