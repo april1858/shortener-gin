@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	Store(string, string)
+	Store(string, string) error
 	Find(string) (string, error)
 }
 
@@ -34,6 +34,6 @@ func (s *Service) CreatorShortened(originalURL string) string {
 
 func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	answer, err := s.R.Find(shortened)
-	
+
 	return answer, err
 }

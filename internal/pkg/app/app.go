@@ -23,7 +23,7 @@ func New() (*App, error) {
 
 	a.c = config.New()
 
-	a.ry = repository.New()
+	a.ry = repository.New(a.c)
 
 	a.s = service.New(a.ry)
 
