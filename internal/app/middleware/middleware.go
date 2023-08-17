@@ -42,7 +42,7 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 
 		c.Header("Content-Encoding", "gzip")
 		// передаём обработчику страницы переменную типа gzipWriter для вывода данных
-		var e gin.Engine
+		var e *gin.Engine
 		e.ServeHTTP(gzipWriter{ResponseWriter: c.Writer, Writer: gz}, c.Request)
 	}
 }
