@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,7 @@ func New() *MW {
 
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader(`Accept-Encoding`) != `gzip` {
+		if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
 			c.Next()
 		}
 
