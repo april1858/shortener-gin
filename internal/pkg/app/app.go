@@ -5,18 +5,19 @@ import (
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
+	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
 type App struct {
 	e  *endpoint.Endpoint
-	ry *repository.Repository
+	rp *repository.Repository
 	s  *service.Service
-	rr *gin.Engine
+	r  *gin.Engine
 	c  *config.Config
+	mw *middleware.MW
 }
 
 func New() (*App, error) {
@@ -24,25 +25,27 @@ func New() (*App, error) {
 
 	a.c = config.New()
 
-	a.ry = repository.New(a.c)
+	a.rp = repository.New(a.c)
 
-	a.s = service.New(a.ry)
+	a.s = service.New(a.rp)
 
 	a.e = endpoint.New(a.s)
 
-	a.rr = gin.Default()
+	a.mw = middleware.New()
 
-	a.rr.Use(gzip.Gzip(gzip.DefaultCompression))
-	a.rr.POST("/", a.e.CreateShortened)
-	a.rr.POST("/api/shorten", a.e.JSONCreateShortened)
-	a.rr.GET("/:id", a.e.GetOriginalURL)
+	a.r = gin.Default()
+
+	a.r.Use(a.mw.GZIP())
+	a.r.POST("/", a.e.CreateShortened)
+	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
+	a.r.GET("/:id", a.e.GetOriginalURL)
 
 	return a, nil
 }
 
 func (a *App) Run() error {
-	fmt.Println("server running. PORT - " + a.c.ServerAddress)
-	a.rr.Run(a.c.ServerAddress)
+	fmt.Println("server running")
+	a.r.Run(a.c.ServerAddress)
 
 	return nil
 }
