@@ -2,10 +2,8 @@ package middleware
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,33 +27,22 @@ func New() *MW {
 
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader(`Accept-Encoding`) == `gzip` {
-			fmt.Println("yes!")
-		}
-		c.Next()
-	}
-}
-
-func gzipHandle(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// проверяем, что клиент поддерживает gzip-сжатие
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			// если gzip не поддерживается, передаём управление
-			// дальше без изменений
-			next.ServeHTTP(w, r)
+		if c.GetHeader(`Accept-Encoding`) != `gzip` {
+			c.Next()
 			return
 		}
 
 		// создаём gzip.Writer поверх текущего w
-		gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
+		gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 		if err != nil {
-			io.WriteString(w, err.Error())
+			io.WriteString(c.Writer, err.Error())
 			return
 		}
 		defer gz.Close()
 
-		w.Header().Set("Content-Encoding", "gzip")
+		c.Header("Content-Encoding", "gzip")
 		// передаём обработчику страницы переменную типа gzipWriter для вывода данных
-		next.ServeHTTP(gzipWriter{ResponseWriter: w, Writer: gz}, r)
-	})
+		var e gin.Engine
+		e.ServeHTTP(gzipWriter{ResponseWriter: c.Writer, Writer: gz}, c.Request)
+	}
 }
