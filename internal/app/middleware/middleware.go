@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"compress/gzip"
 	"io"
 	"net/http"
 	"strings"
@@ -31,16 +30,5 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 		if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
 			c.Next()
 		}
-
-		// создаём gzip.Writer поверх текущего w
-		gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
-		if err != nil {
-			io.WriteString(c.Writer, err.Error())
-			return
-		}
-		defer gz.Close()
-
-		c.Header("Content-Encoding", "gzip")
-		c.Next()
 	}
 }
