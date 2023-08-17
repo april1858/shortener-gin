@@ -41,6 +41,6 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 		defer gz.Close()
 
 		c.Header("Content-Encoding", "gzip")
-
+		c.Next()
 	}
 }
