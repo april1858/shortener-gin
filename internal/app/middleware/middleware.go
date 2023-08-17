@@ -29,7 +29,6 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(`Accept-Encoding`) != `gzip` {
 			c.Next()
-			return
 		}
 
 		// создаём gzip.Writer поверх текущего w
