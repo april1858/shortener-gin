@@ -28,7 +28,8 @@ func New() *MW {
 
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
+		fmt.Println(c.GetHeader("Accept-Encoding"))
+		if c.GetHeader("Accept-Encoding") == "" || !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
 			fmt.Println("!!!!!!!!")
 			c.Next()
 		} else {
