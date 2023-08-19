@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +27,11 @@ func New() *MW {
 
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
+		aE := c.GetHeader("Accept-Encoding")
+		switch aE {
+		case "":
+			fmt.Println("none")
+		case "gzip":
 			gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 			if err != nil {
 				io.WriteString(c.Writer, err.Error())
@@ -37,7 +41,7 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 			c.Writer = gzipWriter{ResponseWriter: c.Writer, Writer: gz}
 			c.Next()
 
-		} else {
+		default:
 			c.Next()
 		}
 
