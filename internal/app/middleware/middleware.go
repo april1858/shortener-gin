@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
 	"strings"
 
@@ -28,6 +29,7 @@ func New() *MW {
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
+			fmt.Println("!!!!!!!!")
 			c.Next()
 		} else {
 			gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
