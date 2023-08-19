@@ -32,6 +32,7 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 			fmt.Println("!!!!!!!!")
 			c.Next()
 		} else {
+			fmt.Println("???????!!!!")
 			gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 			if err != nil {
 				io.WriteString(c.Writer, err.Error())
