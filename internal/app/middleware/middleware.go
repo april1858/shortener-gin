@@ -27,6 +27,7 @@ func New() *MW {
 
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		c.Next()
 		aE := c.GetHeader("Accept-Encoding")
 		switch aE {
 		case "":
