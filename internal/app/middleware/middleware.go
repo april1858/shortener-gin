@@ -35,8 +35,7 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 			defer gz.Close()
 			c.Writer = gzipWriter{ResponseWriter: c.Writer, Writer: gz}
 			c.Next()
-		} else {
-			c.Next()
 		}
+		c.Next()
 	}
 }
