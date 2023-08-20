@@ -3,6 +3,7 @@ package middleware
 import (
 	"compress/gzip"
 	"io"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,7 @@ func New() *MW {
 func (mv *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader("Accept-Encoding") == "gzip" {
+			log.Println("gzip")
 			gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 			if err != nil {
 				io.WriteString(c.Writer, err.Error())
