@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -23,6 +24,7 @@ func New(c *config.Config) *Repository {
 }
 
 func (r *Repository) Store(short, original string) error {
+	fmt.Println("from Store")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	if r.c.FileStoragePath == "" {
