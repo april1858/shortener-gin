@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"compress/gzip"
+	"fmt"
 	"io"
 	"log"
 
@@ -26,8 +27,11 @@ func New() *MW {
 }
 
 func (mv *MW) GZIP() gin.HandlerFunc {
+	fmt.Println("MW1")
 	return func(c *gin.Context) {
+		fmt.Println("MV2")
 		if c.GetHeader("Accept-Encoding") == "gzip" {
+			fmt.Println("MV3")
 			log.Println("gzip")
 			gz, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 			if err != nil {
@@ -35,9 +39,12 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 				return
 			}
 			defer gz.Close()
+			fmt.Println("MV4")
 			c.Writer = gzipWriter{ResponseWriter: c.Writer, Writer: gz}
+			fmt.Println("MV5")
 			c.Next()
 		}
+		fmt.Println("MV6")
 		c.Next()
 	}
 }
