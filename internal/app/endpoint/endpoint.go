@@ -31,13 +31,14 @@ func New(s Service) *Endpoint {
 }
 
 func (e *Endpoint) CreateShortened(c *gin.Context) {
+	contentType := c.GetHeader("Accept")
 	originalURL, _ := c.GetRawData()
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
 		c.Data(http.StatusBadRequest, "text/plain", []byte("Не правильный URL"))
 	} else {
 		shortened := e.S.CreatorShortened(string(originalURL))
-		c.Data(http.StatusCreated, "text/plain", []byte(config.Cnf.BaseURL+shortened))
+		c.Data(http.StatusCreated, contentType, []byte(config.Cnf.BaseURL+shortened))
 	}
 }
 
