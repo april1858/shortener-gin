@@ -49,8 +49,6 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
-		c.Params[0].Value = "1"
-		fmt.Println("params.Param.Value000 - ", c.Params[0].Value)
 		c.Redirect(http.StatusTemporaryRedirect, answer)
 	}
 }

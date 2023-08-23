@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"fmt"
-
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
@@ -15,16 +13,15 @@ func New() *MW {
 }
 
 func (mv *MW) GZIP() gin.HandlerFunc {
-	fmt.Println("MW1")
 	return func(c *gin.Context) {
-		fmt.Println("MV2")
+
 		if c.GetHeader("Accept-Encoding") == "gzip" {
+			if c.GetHeader("Contenet-Encoding") == "gzip" {
+				gzip.DefaultDecompressHandle(c)
+			}
 			gzip.Gzip(gzip.DefaultCompression)
 		}
-		if c.GetHeader("Contenet-Encoding") == "gzip" {
-			gzip.DefaultDecompressHandle(c)
-		}
-		fmt.Println("MV6")
+
 		c.Next()
 	}
 }
