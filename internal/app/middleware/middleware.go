@@ -21,6 +21,9 @@ func (mv *MW) GZIP() gin.HandlerFunc {
 		if c.GetHeader("Accept-Encoding") == "gzip" {
 			gzip.Gzip(gzip.DefaultCompression)
 		}
+		if c.GetHeader("Contenet-Encoding") == "gzip" {
+			gzip.DefaultDecompressHandle(c)
+		}
 		fmt.Println("MV6")
 		c.Next()
 	}
