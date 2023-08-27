@@ -41,6 +41,9 @@ func (s *Service) FindOriginalURL(shortened string) (string, error) {
 
 func (s *Service) FindAllUID() ([]string, error) {
 	answer, err := s.R.FindAllUID()
+	if err != nil {
+		return nil, err
+	}
 
-	return answer, err
+	return answer, nil
 }

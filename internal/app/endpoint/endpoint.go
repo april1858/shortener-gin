@@ -61,15 +61,15 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		c.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
 	} else {
-		var redorect = make([]Redirect, 0, 1)
+		var redirect = make([]Redirect, 0, 1)
 		var r Redirect
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
 			r.ShortURL = config.Cnf.BaseURL + v[0]
 			r.OriginalURL = v[1]
-			redorect = append(redorect, r)
+			redirect = append(redirect, r)
 		}
-		answer, err := json.Marshal(redorect)
+		answer, err := json.Marshal(redirect)
 		if err != nil {
 			return
 		}
