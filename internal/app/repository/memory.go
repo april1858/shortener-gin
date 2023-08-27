@@ -2,8 +2,8 @@ package repository
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -12,6 +12,7 @@ import (
 )
 
 var M = make([]string, 0, 1)
+var UID string
 
 type Repository struct {
 	mx *sync.RWMutex
@@ -24,11 +25,10 @@ func New(c *config.Config) *Repository {
 }
 
 func (r *Repository) Store(short, original string) error {
-	fmt.Println("from Store")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	if r.c.FileStoragePath == "" {
-		M = append(M, short+" "+original)
+		M = append(M, short+" "+original+" "+UID)
 	} else {
 		filename := r.c.FileStoragePath
 		_, err := os.Stat(filename)
@@ -44,7 +44,7 @@ func (r *Repository) Store(short, original string) error {
 				return err
 			}
 			json.Unmarshal(content, &M)
-			M = append(M, short+" "+original)
+			M = append(M, short+" "+original+" "+UID)
 		}
 
 		data, err := json.Marshal(M)
@@ -88,4 +88,38 @@ func (r *Repository) Find(short string) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+func (r *Repository) FindAllUID() ([]string, error) {
+	answer := make([]string, 0, 4)
+	if r.c.FileStoragePath == "" {
+		for _, value := range M {
+			var v = strings.Fields(value)
+			if UID == v[2] {
+				answer = append(answer, v[0]+" "+v[1])
+			}
+		}
+		if len(answer) == nil {
+			return "", error.New(http.StatusNoContent)
+		}
+		return answer, nil
+	} else {
+		filename := r.c.FileStoragePath
+		fileData, err := os.ReadFile(filename)
+
+		if err != nil {
+			log.Println("error ", err)
+			return nil, err
+		}
+		parseData := []string{}
+		json.Unmarshal(fileData, &parseData)
+
+		for _, value := range parseData {
+			var v = strings.Fields(value)
+			if UID == v[2] {
+				answer = append(answer, v[0]+" "+v[1])
+			}
+		}
+		return answer, nil
+	}
 }

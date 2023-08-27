@@ -8,6 +8,7 @@ import (
 type Repository interface {
 	Store(string, string) error
 	Find(string) (string, error)
+	FindAllUID() ([]string, error)
 }
 
 type Service struct {
@@ -34,6 +35,12 @@ func (s *Service) CreatorShortened(originalURL string) string {
 
 func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	answer, err := s.R.Find(shortened)
+
+	return answer, err
+}
+
+func (s *Service) FindAllUID() ([]string, error) {
+	answer, err := s.R.FindAllUID()
 
 	return answer, err
 }

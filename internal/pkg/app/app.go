@@ -35,10 +35,11 @@ func New() (*App, error) {
 
 	a.r = gin.Default()
 
-	a.r.Use(a.mw.GZIP())
+	a.r.Use(a.mw.Cookie(), a.mw.GZIP())
 	a.r.POST("/", a.e.CreateShortened)
 	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
 	a.r.GET("/:id", a.e.GetOriginalURL)
+	a.r.GET("/api/user/urls", a.e.GetAllUID)
 
 	return a, nil
 }

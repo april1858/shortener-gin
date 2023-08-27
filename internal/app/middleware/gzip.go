@@ -12,7 +12,7 @@ func New() *MW {
 	return &MW{}
 }
 
-func (mv *MW) GZIP() gin.HandlerFunc {
+func (mw *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader("Accept-Encoding") == "gzip" {
 			if c.GetHeader("Content-Encoding") == "gzip" {

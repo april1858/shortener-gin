@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 
 	"github.com/gin-gonic/gin"
 )
 
-//var baseURL = config.BaseURL
-
-//var data = make(map[string]string)
-
+type Redirect struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
 type Service interface {
 	CreatorShortened(string) string
 	FindOriginalURL(string) (string, error)
+	FindAllUID() ([]string, error)
 }
 
 type Endpoint struct {
@@ -50,6 +52,28 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
 		c.Redirect(http.StatusTemporaryRedirect, answer)
+	}
+}
+
+func (e *Endpoint) GetAllUID(c *gin.Context) {
+	sliceAll, err := e.S.FindAllUID()
+	if err != nil {
+		s := fmt.Sprintf("Ошибка - %v", err)
+		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
+	} else {
+		var redorect = make([]Redirect, 0, 1)
+		var r Redirect
+		for _, value := range sliceAll {
+			var v = strings.Fields(value)
+			r.ShortURL = v[0]
+			r.OriginalURL = v[1]
+			redorect = append(redorect, r)
+		}
+		answer, err := json.Marshal(redorect)
+		if err != nil {
+			return
+		}
+		c.Data(http.StatusCreated, "application/json", answer)
 	}
 }
 
