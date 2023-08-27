@@ -13,8 +13,8 @@ import (
 )
 
 type Redirect struct {
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
+	ShortURL    string //`json:"short_url"`
+	OriginalURL string //`json:"original_url"`
 }
 type Service interface {
 	CreatorShortened(string) string
