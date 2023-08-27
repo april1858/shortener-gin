@@ -98,6 +98,7 @@ func (r *Repository) FindAllUID() ([]string, error) {
 		for _, value := range M {
 			var v = strings.Fields(value)
 			fmt.Println("v[2] = ", v[2])
+			fmt.Println("UID - ", UID)
 			if UID == v[2] {
 				answer = append(answer, v[0]+" "+v[1])
 				fmt.Println("answer - ", answer)
