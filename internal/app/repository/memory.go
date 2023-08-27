@@ -2,8 +2,8 @@ package repository
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -99,8 +99,8 @@ func (r *Repository) FindAllUID() ([]string, error) {
 				answer = append(answer, v[0]+" "+v[1])
 			}
 		}
-		if len(answer) == nil {
-			return "", error.New(http.StatusNoContent)
+		if len(answer) == 0 {
+			return nil, errors.New("NOT")
 		}
 		return answer, nil
 	} else {

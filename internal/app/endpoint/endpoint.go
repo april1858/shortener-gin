@@ -59,7 +59,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 	sliceAll, err := e.S.FindAllUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
-		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
+		c.Data(http.StatusNoContent, "text/plain", []byte(s))
 	} else {
 		var redorect = make([]Redirect, 0, 1)
 		var r Redirect
