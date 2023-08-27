@@ -66,7 +66,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
 			r.ShortURL = v[0]
-			r.OriginalURL = v[1]
+			r.OriginalURL = config.Cnf.BaseURL + v[1]
 			redorect = append(redorect, r)
 		}
 		answer, err := json.Marshal(redorect)
