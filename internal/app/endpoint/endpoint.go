@@ -59,7 +59,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 	sliceAll, err := e.S.FindAllUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
-		c.Data(http.StatusNoContent, "text/plain", []byte(s))
+		c.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
 	} else {
 		var redorect = make([]Redirect, 0, 1)
 		var r Redirect
@@ -73,7 +73,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 		if err != nil {
 			return
 		}
-		c.Data(http.StatusCreated, "application/json", answer)
+		c.Data(http.StatusOK, "text/plain application/json", answer)
 	}
 }
 
