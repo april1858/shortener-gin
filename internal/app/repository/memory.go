@@ -30,6 +30,7 @@ func (r *Repository) Store(short, original string) error {
 	defer r.mx.Unlock()
 	if r.c.FileStoragePath == "" {
 		M = append(M, short+" "+original+" "+UID)
+		fmt.Println("store M = ", M)
 	} else {
 		filename := r.c.FileStoragePath
 		_, err := os.Stat(filename)
