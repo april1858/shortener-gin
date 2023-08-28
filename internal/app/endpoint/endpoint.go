@@ -73,6 +73,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 		if err != nil {
 			return
 		}
+		c.Header("WWW-Authenticate", `Basic realm="api"`)
 		c.Data(http.StatusOK, "text/plain application/json", answer)
 	}
 }
