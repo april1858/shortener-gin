@@ -93,20 +93,15 @@ func (r *Repository) Find(short string) (string, error) {
 }
 
 func (r *Repository) FindAllUID() ([]string, error) {
-	fmt.Println("M = ", M)
 	answer := make([]string, 0, 4)
 	if r.c.FileStoragePath == "" {
 		for _, value := range M {
 			var v = strings.Fields(value)
-			fmt.Println("v[2] = ", v[2])
-			fmt.Println("UID - ", UID)
 			if UID == v[2] {
 				answer = append(answer, v[0]+" "+v[1])
-				fmt.Println("answer - ", answer)
 			}
 		}
 		if len(answer) == 0 {
-			fmt.Println("NOT!!!")
 			return nil, errors.New("NOT")
 		}
 		return answer, nil
