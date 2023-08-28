@@ -46,7 +46,7 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 		if err != nil {
 			fmt.Println("err from Cookie() ", err)
 		}
-		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "localhost", true, true)
+		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", true, true)
 		c.Next()
 	}
 }
