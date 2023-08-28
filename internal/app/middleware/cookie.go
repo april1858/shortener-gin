@@ -22,10 +22,10 @@ var (
 		Name:  "UID",
 		Value: "",
 		//Path:     "/",
-		MaxAge:   3600,
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		//MaxAge:   3600,
+		//HttpOnly: true,
+		//Secure:   true,
+		//SameSite: http.SameSiteLaxMode,
 	}
 )
 
