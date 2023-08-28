@@ -19,9 +19,9 @@ var (
 	ErrInvalidValue = errors.New("invalid cookie value")
 	secretKey       = []byte("12345")
 	cookie          = http.Cookie{
-		Name:     "UID",
-		Value:    "",
-		Path:     "/",
+		Name:  "UID",
+		Value: "",
+		//Path:     "/",
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   true,
