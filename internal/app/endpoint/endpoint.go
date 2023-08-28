@@ -56,6 +56,8 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 }
 
 func (e *Endpoint) GetAllUID(c *gin.Context) {
+	q, _ := c.Cookie("UID")
+	fmt.Println("q - ", q)
 	sliceAll, err := e.S.FindAllUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
