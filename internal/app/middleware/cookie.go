@@ -21,11 +21,6 @@ var (
 	cookie          = http.Cookie{
 		Name:  "UID",
 		Value: "",
-		//Path:     "/",
-		//MaxAge:   3600,
-		//HttpOnly: true,
-		//Secure:   true,
-		//SameSite: http.SameSiteLaxMode,
 	}
 )
 
