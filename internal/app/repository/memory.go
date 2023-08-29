@@ -3,7 +3,6 @@ package repository
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -28,9 +27,15 @@ func New(c *config.Config) *Repository {
 func (r *Repository) Store(short, original string) error {
 	r.mx.Lock()
 	defer r.mx.Unlock()
+	if r.c.DatabaseDsn != "" {
+		if err := r.insertDB(short, original); err != nil {
+			return err
+		} else {
+			return nil
+		}
+	}
 	if r.c.FileStoragePath == "" {
 		M = append(M, short+" "+original+" "+UID)
-		fmt.Println("store M = ", M)
 	} else {
 		filename := r.c.FileStoragePath
 		_, err := os.Stat(filename)
