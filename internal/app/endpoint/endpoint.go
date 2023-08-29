@@ -20,6 +20,7 @@ type Service interface {
 	CreatorShortened(string) string
 	FindOriginalURL(string) (string, error)
 	FindAllUID() ([]string, error)
+	Ping() (string, error)
 }
 
 type Endpoint struct {
@@ -101,4 +102,12 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	}
 
 	c.Data(http.StatusCreated, "application/json", answer)
+}
+
+func (e *Endpoint) Ping(c *gin.Context) {
+	_, err := e.S.Ping()
+	if err != nil {
+		c.Data(http.StatusInternalServerError, "", nil)
+	}
+	c.Data(http.StatusOK, "", nil)
 }

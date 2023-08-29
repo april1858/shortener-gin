@@ -9,25 +9,25 @@ type Config struct {
 	BaseURL         string
 	ServerAddress   string
 	FileStoragePath string
-	//DatabaseDsn	string
+	DatabaseDsn     string
 }
 
 var (
 	A = flag.String("a", "", "server_address")
 	B = flag.String("b", "", "base_url")
 	F = flag.String("f", "", "file_storage_path")
-	//D = flag.String("d", "", "database_dsn")
+	D = flag.String("d", "", "database_dsn")
 )
 
 var Cnf Config
 
 func New() *Config {
 
-	var address, baseurl, file string
+	var address, baseurl, file, db string
 	a := os.Getenv("SERVER_ADDRESS")
 	b := os.Getenv("BASE_URL")
 	f := os.Getenv("FILE_STORAGE_PATH")
-	//d := os.Getenv("DATABASE_DSN")
+	d := os.Getenv("DATABASE_DSN")
 	flag.Parse()
 
 	if a == "" {
@@ -50,6 +50,16 @@ func New() *Config {
 		baseurl = b
 	}
 
+	if d == "" {
+		if *D == "" {
+			db = "postgres://april:bachbwv@localhost:5432/shortener"
+		} else {
+			db = *D
+		}
+	} else {
+		db = d
+	}
+
 	if f == "" {
 		if *F == "" {
 			file = ""
@@ -63,6 +73,7 @@ func New() *Config {
 	Cnf.BaseURL = baseurl + "/"
 	Cnf.ServerAddress = address
 	Cnf.FileStoragePath = file
+	Cnf.DatabaseDsn = db
 
 	return &Cnf
 }

@@ -9,6 +9,7 @@ type Repository interface {
 	Store(string, string) error
 	Find(string) (string, error)
 	FindAllUID() ([]string, error)
+	Ping() (string, error)
 }
 
 type Service struct {
@@ -46,4 +47,10 @@ func (s *Service) FindAllUID() ([]string, error) {
 	}
 
 	return answer, nil
+}
+
+func (s *Service) Ping() (string, error) {
+	answer, err := s.R.Ping()
+
+	return answer, err
 }

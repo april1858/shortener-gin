@@ -93,6 +93,5 @@ func createCode() string {
 		return "error in createCode()"
 	}
 	repository.UID = hex.EncodeToString(b)
-	fmt.Println("UID from create - ", hex.EncodeToString(b))
 	return hex.EncodeToString(b)
 }

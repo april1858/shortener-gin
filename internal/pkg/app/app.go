@@ -40,6 +40,7 @@ func New() (*App, error) {
 	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
 	a.r.GET("/:id", a.e.GetOriginalURL)
 	a.r.GET("/api/user/urls", a.e.GetAllUID)
+	a.r.GET("/ping", a.e.Ping)
 
 	return a, nil
 }
