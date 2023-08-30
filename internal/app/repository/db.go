@@ -49,8 +49,9 @@ func (r Repository) connectDB() (context.Context, *pgxpool.Pool) {
 }
 
 func (r Repository) insertDB(short, original string) error {
+	uid := UID
 	ctx, db := r.connectDB()
-	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, short, original); err != nil {
+	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
