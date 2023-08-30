@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -31,11 +30,12 @@ func (r Repository) Ping() (string, error) {
 
 func (r Repository) connectDB() (context.Context, *pgxpool.Pool) {
 	ctx := context.Background()
-	poolConfig, err := pgxpool.ParseConfig(os.Getenv(r.c.DatabaseDsn))
+	fmt.Println("r.c.DatabaseDsn - ", r.c.DatabaseDsn)
+	poolConfig, err := pgxpool.ParseConfig(r.c.DatabaseDsn)
 	if err != nil {
 		log.Fatalln("Unable to parse DATABASE_DSN:", err)
 	}
-
+	fmt.Println("poolConfig - ", poolConfig.ConnString())
 	db, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		log.Fatalln("Unable to create connection pool:", err)
