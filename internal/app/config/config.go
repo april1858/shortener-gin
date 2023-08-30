@@ -52,7 +52,7 @@ func New() *Config {
 
 	if d == "" {
 		if *D == "" {
-			db = "postgres://april:bachbwv@localhost:5432/shortener"
+			db = ""
 		} else {
 			db = *D
 		}
