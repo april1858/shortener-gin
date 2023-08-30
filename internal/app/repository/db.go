@@ -68,23 +68,22 @@ func (r Repository) insertDB(short, original string) error {
 }
 
 /*
-func (r Repository) StoreLot(redirect *entity.Redirect2) error {
-	ctx, db := r.connectDB()
-	if _, err := db.Exec(ctx, `insert into "shortener4" (str_id, code, url) values ($1,$2,$3)`, redirect.CorrelationID, redirect.ShortURL, redirect.OriginalURL); err != nil {
-		fmt.Println("errorrs!", err)
+	func (r Repository) StoreLot(redirect *entity.Redirect2) error {
+		ctx, db := r.connectDB()
+		if _, err := db.Exec(ctx, `insert into "shortener4" (str_id, code, url) values ($1,$2,$3)`, redirect.CorrelationID, redirect.ShortURL, redirect.OriginalURL); err != nil {
+			fmt.Println("errorrs!", err)
+		}
+		r.memory[redirect.ShortURL] = redirect.OriginalURL
+		return nil
 	}
-	r.memory[redirect.ShortURL] = redirect.OriginalURL
-	return nil
-}
-
-func (mr Repository) findDB(shorturl string) string {
+*/
+func (r Repository) findDB(shorturl string) (string, error) {
 	var answer string
-	ctx, db := connectDB()
+	ctx, db := r.connectDB()
 	row := db.QueryRow(ctx, `select url from "shortener4" where code=$1`, shorturl)
 	err := row.Scan(&answer)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return answer
+	return answer, nil
 }
-*/

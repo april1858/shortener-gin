@@ -69,6 +69,14 @@ func (r *Repository) Store(short, original string) error {
 }
 
 func (r *Repository) Find(short string) (string, error) {
+	if r.c.DatabaseDsn != "" {
+		answer, err := r.findDB(short)
+		if err != nil {
+			return "", err
+		} else {
+			return answer, nil
+		}
+	}
 	if r.c.FileStoragePath == "" {
 		for _, value := range M {
 			var v = strings.Fields(value)
