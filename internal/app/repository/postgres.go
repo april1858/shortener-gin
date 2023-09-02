@@ -11,9 +11,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func (r Repository) Ping() (string, error) {
+func (r Repository) Ping(dsn string) (string, error) {
 	cx := context.Background()
-	conn, err := pgx.Connect(cx, r.c.DatabaseDsn)
+	conn, err := pgx.Connect(cx, dsn)
 	if err != nil {
 		return "", err
 	}
@@ -28,14 +28,12 @@ func (r Repository) Ping() (string, error) {
 	return "Conn", nil
 }
 
-func (r Repository) connectDB() (context.Context, *pgxpool.Pool) {
+func (r Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool) {
 	ctx := context.Background()
-	fmt.Println("r.c.DatabaseDsn - ", r.c.DatabaseDsn)
-	poolConfig, err := pgxpool.ParseConfig(r.c.DatabaseDsn)
+	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		log.Fatalln("Unable to parse DATABASE_DSN:", err)
 	}
-	fmt.Println("poolConfig - ", poolConfig.ConnString())
 	db, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		log.Fatalln("Unable to create connection pool:", err)
@@ -48,15 +46,15 @@ func (r Repository) connectDB() (context.Context, *pgxpool.Pool) {
 	return ctx, db
 }
 
-func (r Repository) insertDB(short, original string) error {
+func (r Repository) DBStore(dsn, short, original string) error {
 	uid := UID
-	ctx, db := r.connectDB()
+	ctx, db := r.connectDB(dsn)
 	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
 				var answer string
-				row := db.QueryRow(ctx, `select code from "shortener4" where url=$1`, original)
+				row := db.QueryRow(ctx, `select short_url from "shortener" where original_url=$1`, original)
 				err := row.Scan(&answer)
 				if err != nil {
 					panic(err)
@@ -68,23 +66,34 @@ func (r Repository) insertDB(short, original string) error {
 	return nil
 }
 
-/*
-	func (r Repository) StoreLot(redirect *entity.Redirect2) error {
-		ctx, db := r.connectDB()
-		if _, err := db.Exec(ctx, `insert into "shortener4" (str_id, code, url) values ($1,$2,$3)`, redirect.CorrelationID, redirect.ShortURL, redirect.OriginalURL); err != nil {
-			fmt.Println("errorrs!", err)
-		}
-		r.memory[redirect.ShortURL] = redirect.OriginalURL
-		return nil
+func (r Repository) StoreBatch(dsn string, batch []map[string]string) error {
+	ctx, db := r.connectDB(dsn)
+	fmt.Println("from db - ", batch)
+	_, err := db.Exec(ctx, `INSERT INTO shortener (uid, short_url, original_url) VALUES ($1, $2, $3)`, batch)
+	if err != nil {
+		fmt.Println("222 - ", err)
 	}
-*/
-func (r Repository) findDB(shorturl string) (string, error) {
+	return nil
+}
+
+func (r Repository) DBFind(dsn, shorturl string) (string, error) {
 	var answer string
-	ctx, db := r.connectDB()
-	row := db.QueryRow(ctx, `select url from "shortener4" where code=$1`, shorturl)
+	ctx, db := r.connectDB(dsn)
+	row := db.QueryRow(ctx, `select original_url from "shortener" where short_url=$1`, shorturl)
 	err := row.Scan(&answer)
 	if err != nil {
 		return "", err
+	}
+	return answer, nil
+}
+
+func (r Repository) DBFindByUID(dsn string) ([]string, error) {
+	var answer []string
+	ctx, db := r.connectDB(dsn)
+	row := db.QueryRow(ctx, `select original_url from "shortener" where uid=UID`)
+	err := row.Scan(&answer)
+	if err != nil {
+		return nil, err
 	}
 	return answer, nil
 }

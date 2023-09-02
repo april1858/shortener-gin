@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/april1858/shortener-gin/internal/app/repository"
+	"github.com/april1858/shortener-gin/internal/app/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +33,9 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 			if err != nil {
 				fmt.Println("err err - ", err)
 			}
+			service.UID = value
 			repository.UID = value
+
 			c.Next()
 			return
 		}
@@ -71,6 +74,8 @@ func ReadSigned(sValue string) (string, error) {
 
 func WriteSigned() error {
 	cookie.Value = createCode()
+	service.UID = cookie.Value
+	repository.UID = cookie.Value
 	mac := hmac.New(sha256.New, secretKey)
 	mac.Write([]byte(cookie.Name))
 	mac.Write([]byte(cookie.Value))

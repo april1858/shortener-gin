@@ -25,19 +25,21 @@ func New() (*App, error) {
 
 	a.c = config.New()
 
-	a.rp = repository.New(a.c)
+	a.rp = repository.New()
 
-	a.s = service.New(a.rp)
+	a.s = service.New(a.rp, *a.c)
 
 	a.e = endpoint.New(a.s)
 
 	a.mw = middleware.New()
 
+	gin.SetMode(gin.ReleaseMode)
 	a.r = gin.Default()
 
 	a.r.Use(a.mw.Cookie(), a.mw.GZIP())
 	a.r.POST("/", a.e.CreateShortened)
 	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
+	//a.r.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
 	a.r.GET("/:id", a.e.GetOriginalURL)
 	a.r.GET("/api/user/urls", a.e.GetAllUID)
 	a.r.GET("/ping", a.e.Ping)

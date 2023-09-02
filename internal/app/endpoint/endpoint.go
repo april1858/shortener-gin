@@ -19,8 +19,9 @@ type Redirect struct {
 type Service interface {
 	CreatorShortened(string) string
 	FindOriginalURL(string) (string, error)
-	FindAllUID() ([]string, error)
+	FindByUID() ([]string, error)
 	Ping() (string, error)
+	//CreatorShortenedBatch([]map[string]string) []string
 }
 
 type Endpoint struct {
@@ -57,7 +58,7 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 }
 
 func (e *Endpoint) GetAllUID(c *gin.Context) {
-	sliceAll, err := e.S.FindAllUID()
+	sliceAll, err := e.S.FindByUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		c.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
@@ -111,3 +112,36 @@ func (e *Endpoint) Ping(c *gin.Context) {
 	}
 	c.Data(http.StatusOK, "", nil)
 }
+
+/*
+func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
+	objQuery := make([]map[string]string, 2, 2)
+	requestBody, _ := c.GetRawData()
+
+	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
+		fmt.Println("err - ", err)
+		return
+	}
+	answer := e.S.CreatorShortenedBatch(objQuery)
+	fmt.Println(answer)
+
+	   _, err := url.ParseRequestURI(objQuery["url"])
+
+	   	if err != nil {
+	   		c.Data(http.StatusBadRequest, "application/json", []byte("Не правильный URL"))
+	   	} else {
+
+	   		shortened = e.S.CreatorShortened(objQuery["url"])
+	   	}
+
+	   answerStruct := map[string]string{"result": config.Cnf.BaseURL + shortened}
+	   answer, err := json.Marshal(answerStruct)
+
+	   	if err != nil {
+	   		return
+	   	}
+
+	   c.Data(http.StatusCreated, "application/json", answer)
+
+}
+*/
