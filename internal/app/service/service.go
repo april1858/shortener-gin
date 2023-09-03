@@ -56,7 +56,7 @@ func (s *Service) CreatorShortened(originalURL string) string {
 
 func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 	answer := make([]string, 0, 2)
-	toDB := make([]map[string]string, 2)
+	toDB := make([]map[string]string, 0)
 
 	for _, v := range batch {
 		mp := make(map[string]string, 0)
