@@ -114,7 +114,7 @@ func (e *Endpoint) Ping(c *gin.Context) {
 }
 
 func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
-	objQuery := make([]map[string]string, 2, 2)
+	objQuery := make([]map[string]string, 2)
 	requestBody, _ := c.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
