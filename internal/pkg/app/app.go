@@ -39,7 +39,7 @@ func New() (*App, error) {
 	a.r.Use(a.mw.Cookie(), a.mw.GZIP())
 	a.r.POST("/", a.e.CreateShortened)
 	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
-	//a.r.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
+	a.r.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
 	a.r.GET("/:id", a.e.GetOriginalURL)
 	a.r.GET("/api/user/urls", a.e.GetAllUID)
 	a.r.GET("/ping", a.e.Ping)

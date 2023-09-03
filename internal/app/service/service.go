@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 )
@@ -20,7 +21,7 @@ type Repository interface {
 	DBFind(dsn, shorturl string) (string, error)
 	DBFindByUID(dsn string) ([]string, error)
 	Ping(dsn string) (string, error)
-	//StoreBatch([]map[string]string) error
+	BulkInsert(string, []map[string]string) error
 }
 
 type Service struct {
@@ -53,24 +54,30 @@ func (s *Service) CreatorShortened(originalURL string) string {
 	return hex.EncodeToString(b)
 }
 
-/*
-	func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
-		answer := make([]string, 0, 2)
-		for _, v := range batch {
-			b := make([]byte, 4)
-			_, err := rand.Read(b)
-			if err != nil {
-				return nil
-			}
-			answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+UID)
-		}
-		err := s.r.StoreBatch(batch)
+func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
+	answer := make([]string, 0, 2)
+	toDB := make([]map[string]string, 2, 2)
+
+	for i, v := range batch {
+		mp := make(map[string]string, 0)
+		b := make([]byte, 4)
+		_, err := rand.Read(b)
 		if err != nil {
-			fmt.Println("err from service - ", err)
+			return nil
 		}
-		return answer
+		answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+UID)
+		mp["short_url"] = hex.EncodeToString(b)
+		mp["original_url"] = v["original_url"]
+		mp["uid"] = UID
+		toDB[i] = mp
 	}
-*/
+	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
+	if err != nil {
+		fmt.Println("err from service - ", err)
+	}
+	return answer
+}
+
 func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	var (
 		answer string

@@ -97,3 +97,20 @@ func (r Repository) DBFindByUID(dsn string) ([]string, error) {
 	}
 	return answer, nil
 }
+
+func (r Repository) BulkInsert(dsn string, bulks []map[string]string) error {
+	ctx, db := r.connectDB(dsn)
+	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
+	batch := &pgx.Batch{}
+	for _, bulk := range bulks {
+		args := pgx.NamedArgs{
+			"uid":          bulk["uid"],
+			"short_url":    bulk["short_url"],
+			"original_url": bulk["original_url"],
+		}
+		batch.Queue(query, args)
+	}
+	results := db.SendBatch(ctx, batch)
+	defer results.Close()
+	return nil
+}

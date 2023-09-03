@@ -21,7 +21,7 @@ type Service interface {
 	FindOriginalURL(string) (string, error)
 	FindByUID() ([]string, error)
 	Ping() (string, error)
-	//CreatorShortenedBatch([]map[string]string) []string
+	CreatorShortenedBatch([]map[string]string) []string
 }
 
 type Endpoint struct {
@@ -113,7 +113,6 @@ func (e *Endpoint) Ping(c *gin.Context) {
 	c.Data(http.StatusOK, "", nil)
 }
 
-/*
 func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 	objQuery := make([]map[string]string, 2, 2)
 	requestBody, _ := c.GetRawData()
@@ -122,26 +121,19 @@ func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 		fmt.Println("err - ", err)
 		return
 	}
+	fmt.Println("objQuery", objQuery)
 	answer := e.S.CreatorShortenedBatch(objQuery)
-	fmt.Println(answer)
+	fmt.Printf("type %T\n", answer)
+	fmt.Println("from endpoing - ", len(answer))
+	for i, v := range objQuery {
+		delete(v, "original_url")
+		v["short_url"] = strings.Fields(answer[i])[0]
+	}
+	answer1, err := json.Marshal(objQuery)
 
-	   _, err := url.ParseRequestURI(objQuery["url"])
-
-	   	if err != nil {
-	   		c.Data(http.StatusBadRequest, "application/json", []byte("Не правильный URL"))
-	   	} else {
-
-	   		shortened = e.S.CreatorShortened(objQuery["url"])
-	   	}
-
-	   answerStruct := map[string]string{"result": config.Cnf.BaseURL + shortened}
-	   answer, err := json.Marshal(answerStruct)
-
-	   	if err != nil {
-	   		return
-	   	}
-
-	   c.Data(http.StatusCreated, "application/json", answer)
+	if err != nil {
+		return
+	}
+	c.Data(http.StatusCreated, "application/json", []byte(answer1))
 
 }
-*/
