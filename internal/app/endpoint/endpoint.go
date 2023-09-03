@@ -59,6 +59,7 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 }
 
 func (e *Endpoint) GetAllUID(c *gin.Context) {
+	fmt.Println("1. GetAllUID")
 	sliceAll, err := e.S.FindByUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
@@ -126,7 +127,7 @@ func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 	answer := e.S.CreatorShortenedBatch(objQuery)
 	for i, v := range objQuery {
 		delete(v, "original_url")
-		v["short_url"] = strings.Fields(answer[i])[0]
+		v["short_url"] = config.Cnf.BaseURL + strings.Fields(answer[i])[0]
 	}
 	answer1, err := json.Marshal(objQuery)
 
