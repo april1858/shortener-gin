@@ -17,7 +17,7 @@ type Repository interface {
 	FileStore(filename, short, original string) error
 	FileFind(filename, short string) (string, error)
 	FileFindByUID(filename string) ([]string, error)
-	DBStore(dsn, short, original string) error
+	DBStore(dsn, short, original string) (string, error)
 	DBFind(dsn, shorturl string) (string, error)
 	DBFindByUID(dsn string) ([]string, error)
 	Ping(dsn string) (string, error)
@@ -36,26 +36,29 @@ func New(r Repository, c config.Config) *Service {
 	}
 }
 
-func (s *Service) CreatorShortened(originalURL string) string {
+func (s *Service) CreatorShortened(originalURL string) (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
-		return "error in CreatorShortened()"
+		return "error in CreatorShortened()", err
 	}
 	switch {
 	case s.c.FileStoragePath != "":
 		s.r.FileStore(s.c.FileStoragePath, hex.EncodeToString(b), originalURL)
 	case s.c.DatabaseDsn != "":
-		s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL)
+		answer, err := s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL)
+		if err != nil {
+			fmt.Println("пока так")
+		}
+		return answer, nil
 	default:
 		s.r.MemoryStore(hex.EncodeToString(b), originalURL)
 	}
 
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }
 
 func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
-	fmt.Println("CreatorShortenedBatch from s")
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
 
@@ -81,7 +84,6 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 }
 
 func (s *Service) FindOriginalURL(shortened string) (string, error) {
-	fmt.Println("FindOriginalURL from e")
 	var (
 		answer string
 		err    error
@@ -90,7 +92,6 @@ func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	case s.c.FileStoragePath != "":
 		answer, err = s.r.FileFind(s.c.FileStoragePath, shortened)
 	case s.c.DatabaseDsn != "":
-		fmt.Println("2. FindOriginalURL")
 		answer, err = s.r.DBFind(s.c.DatabaseDsn, shortened)
 	default:
 		answer, err = s.r.MemoryFind(shortened)

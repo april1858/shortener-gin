@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 )
@@ -22,7 +21,6 @@ func (r *Repository) MemoryStore(short, original string) error {
 	mx.Lock()
 	defer mx.Unlock()
 	M = append(M, short+" "+original+" "+UID)
-	fmt.Println("M - ", M)
 	return nil
 }
 

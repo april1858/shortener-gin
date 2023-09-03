@@ -17,7 +17,7 @@ type Redirect struct {
 	OriginalURL string `json:"original_url"`
 }
 type Service interface {
-	CreatorShortened(string) string
+	CreatorShortened(string) (string, error)
 	FindOriginalURL(string) (string, error)
 	FindByUID() ([]string, error)
 	Ping() (string, error)
@@ -36,13 +36,17 @@ func New(s Service) *Endpoint {
 
 func (e *Endpoint) CreateShortened(c *gin.Context) {
 	contentType := c.GetHeader("Accept")
+	status := http.StatusCreated
 	originalURL, _ := c.GetRawData()
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
 		c.Data(http.StatusBadRequest, "text/plain", []byte("Не правильный URL"))
 	} else {
-		shortened := e.S.CreatorShortened(string(originalURL))
-		c.Data(http.StatusCreated, contentType, []byte(config.Cnf.BaseURL+shortened))
+		shortened, err := e.S.CreatorShortened(string(originalURL))
+		if err != nil {
+			status = http.StatusConflict
+		}
+		c.Data(status, contentType, []byte(config.Cnf.BaseURL+shortened))
 	}
 }
 
@@ -59,7 +63,6 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 }
 
 func (e *Endpoint) GetAllUID(c *gin.Context) {
-	fmt.Println("1. GetAllUID")
 	sliceAll, err := e.S.FindByUID()
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
@@ -84,6 +87,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 
 func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	var shortened string
+	status := http.StatusCreated
 	objQuery := make(map[string]string)
 	requestBody, _ := c.GetRawData()
 
@@ -95,7 +99,10 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	if err != nil {
 		c.Data(http.StatusBadRequest, "application/json", []byte("Не правильный URL"))
 	} else {
-		shortened = e.S.CreatorShortened(objQuery["url"])
+		shortened, err = e.S.CreatorShortened(objQuery["url"])
+		if err != nil {
+			status = http.StatusConflict
+		}
 	}
 
 	answerStruct := map[string]string{"result": config.Cnf.BaseURL + shortened}
@@ -104,7 +111,7 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 		return
 	}
 
-	c.Data(http.StatusCreated, "application/json", answer)
+	c.Data(status, "application/json", answer)
 }
 
 func (e *Endpoint) Ping(c *gin.Context) {
@@ -116,7 +123,6 @@ func (e *Endpoint) Ping(c *gin.Context) {
 }
 
 func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
-	fmt.Println("CreateShortenedBatch from e")
 	objQuery := make([]map[string]string, 0)
 	requestBody, _ := c.GetRawData()
 
