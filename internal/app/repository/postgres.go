@@ -76,6 +76,7 @@ func (r Repository) StoreBatch(dsn string, batch []map[string]string) error {
 }
 
 func (r Repository) DBFind(dsn, shorturl string) (string, error) {
+	fmt.Println("3. DBFind")
 	var answer string
 	ctx, db := r.connectDB(dsn)
 	row := db.QueryRow(ctx, `select original_url from "shortener" where short_url=$1`, shorturl)

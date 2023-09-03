@@ -47,6 +47,7 @@ func (e *Endpoint) CreateShortened(c *gin.Context) {
 }
 
 func (e *Endpoint) GetOriginalURL(c *gin.Context) {
+	fmt.Println("1. GetOriginalURL")
 	shortened := c.Param("id")
 	answer, err := e.S.FindOriginalURL(shortened)
 	if err != nil {

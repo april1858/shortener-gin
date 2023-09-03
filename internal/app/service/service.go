@@ -88,6 +88,7 @@ func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	case s.c.FileStoragePath != "":
 		answer, err = s.r.FileFind(s.c.FileStoragePath, shortened)
 	case s.c.DatabaseDsn != "":
+		fmt.Println("2. FindOriginalURL")
 		answer, err = s.r.DBFind(s.c.DatabaseDsn, shortened)
 	default:
 		answer, err = s.r.MemoryFind(shortened)
