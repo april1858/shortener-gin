@@ -99,6 +99,7 @@ func (r Repository) DBFindByUID(dsn string) ([]string, error) {
 }
 
 func (r Repository) BulkInsert(dsn string, bulks []map[string]string) error {
+	fmt.Println("BulkInsert from r")
 	ctx, db := r.connectDB(dsn)
 	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
 	batch := &pgx.Batch{}
