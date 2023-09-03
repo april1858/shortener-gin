@@ -36,7 +36,8 @@ func New(s Service) *Endpoint {
 
 func (e *Endpoint) CreateShortened(c *gin.Context) {
 	contentType := c.GetHeader("Accept")
-	status := http.StatusCreated
+	var status int = http.StatusCreated
+	fmt.Printf("type - %T\n", status)
 	originalURL, _ := c.GetRawData()
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
@@ -87,7 +88,7 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 
 func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	var shortened string
-	status := http.StatusCreated
+	var status int = http.StatusCreated
 	objQuery := make(map[string]string)
 	requestBody, _ := c.GetRawData()
 
