@@ -68,7 +68,6 @@ func (r Repository) DBStore(dsn, short, original string) error {
 
 func (r Repository) StoreBatch(dsn string, batch []map[string]string) error {
 	ctx, db := r.connectDB(dsn)
-	fmt.Println("from db - ", batch)
 	_, err := db.Exec(ctx, `INSERT INTO shortener (uid, short_url, original_url) VALUES ($1, $2, $3)`, batch)
 	if err != nil {
 		fmt.Println("222 - ", err)

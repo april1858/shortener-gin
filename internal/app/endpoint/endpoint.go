@@ -121,10 +121,7 @@ func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 		fmt.Println("err - ", err)
 		return
 	}
-	fmt.Println("objQuery", objQuery)
 	answer := e.S.CreatorShortenedBatch(objQuery)
-	fmt.Printf("type %T\n", answer)
-	fmt.Println("from endpoing - ", len(answer))
 	for i, v := range objQuery {
 		delete(v, "original_url")
 		v["short_url"] = strings.Fields(answer[i])[0]

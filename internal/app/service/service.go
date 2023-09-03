@@ -56,9 +56,9 @@ func (s *Service) CreatorShortened(originalURL string) string {
 
 func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 	answer := make([]string, 0, 2)
-	toDB := make([]map[string]string, 2, 2)
+	toDB := make([]map[string]string, 0, 2)
 
-	for i, v := range batch {
+	for _, v := range batch {
 		mp := make(map[string]string, 0)
 		b := make([]byte, 4)
 		_, err := rand.Read(b)
@@ -69,8 +69,9 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 		mp["short_url"] = hex.EncodeToString(b)
 		mp["original_url"] = v["original_url"]
 		mp["uid"] = UID
-		toDB[i] = mp
+		toDB = append(toDB, mp)
 	}
+	fmt.Println("todb - ", toDB)
 	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
 	if err != nil {
 		fmt.Println("err from service - ", err)
