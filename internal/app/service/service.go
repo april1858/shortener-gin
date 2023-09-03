@@ -55,6 +55,7 @@ func (s *Service) CreatorShortened(originalURL string) string {
 }
 
 func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
+	fmt.Println("CreatorShortenedBatch from s")
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
 
@@ -80,6 +81,7 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 }
 
 func (s *Service) FindOriginalURL(shortened string) (string, error) {
+	fmt.Println("FindOriginalURL from e")
 	var (
 		answer string
 		err    error
