@@ -48,9 +48,8 @@ func (s *Service) CreatorShortened(originalURL string) (string, error) {
 	case s.c.DatabaseDsn != "":
 		answer, err := s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL)
 		if err != nil {
-			fmt.Println("пока так")
+			return answer, err
 		}
-		return answer, nil
 	default:
 		s.r.MemoryStore(hex.EncodeToString(b), originalURL)
 	}

@@ -60,7 +60,7 @@ func (r Repository) DBStore(dsn, short, original string) (string, error) {
 					panic(err)
 				}
 				fmt.Println("answer 23505", answer)
-				return answer, nil
+				return answer, pgxError
 			}
 		}
 	}

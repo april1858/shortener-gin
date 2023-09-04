@@ -37,7 +37,6 @@ func New(s Service) *Endpoint {
 func (e *Endpoint) CreateShortened(c *gin.Context) {
 	contentType := c.GetHeader("Accept")
 	var status int = http.StatusCreated
-	fmt.Printf("type - %T\n", status)
 	originalURL, _ := c.GetRawData()
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
