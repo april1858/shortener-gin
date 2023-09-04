@@ -74,7 +74,6 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 		mp["uid"] = UID
 		toDB = append(toDB, mp)
 	}
-	fmt.Println("todb - ", toDB)
 	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
 	if err != nil {
 		fmt.Println("err from service - ", err)

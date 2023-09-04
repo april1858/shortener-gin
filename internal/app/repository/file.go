@@ -5,9 +5,13 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
 func (r *Repository) FileStore(filename, short, original string) error {
+	mx := new(sync.RWMutex)
+	mx.Lock()
+	defer mx.Unlock()
 	_, err := os.Stat(filename)
 	if err != nil {
 		if os.IsNotExist(err) {

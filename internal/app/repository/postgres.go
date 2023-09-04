@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -38,7 +39,6 @@ func (r Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool) {
 	if err != nil {
 		log.Fatalln("Unable to create connection pool:", err)
 	}
-
 	_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 	if err != nil {
 		fmt.Println("err - ", err)
@@ -47,6 +47,9 @@ func (r Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool) {
 }
 
 func (r Repository) DBStore(dsn, short, original string) (string, error) {
+	mx := new(sync.RWMutex)
+	mx.Lock()
+	defer mx.Unlock()
 	uid := UID
 	ctx, db := r.connectDB(dsn)
 	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
@@ -59,7 +62,6 @@ func (r Repository) DBStore(dsn, short, original string) (string, error) {
 				if err != nil {
 					panic(err)
 				}
-				fmt.Println("answer 23505", answer)
 				return answer, pgxError
 			}
 		}
