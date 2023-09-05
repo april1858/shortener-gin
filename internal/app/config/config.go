@@ -51,19 +51,21 @@ func New() *Config {
 	}
 
 	if d == "" {
+		db = *D
 		if *D == "" {
 			db = ""
-		} else {
-			db = *D
 		}
+	} else {
+		db = d
 	}
 
 	if f == "" {
+		file = *F
 		if *F == "" {
 			file = ""
-		} else {
-			file = *F
 		}
+	} else {
+		file = f
 	}
 
 	Cnf.BaseURL = baseurl + "/"
