@@ -52,13 +52,12 @@ func New() *Config {
 
 	if d == "" {
 		if *D == "" {
-			db = ""
+			db = "0"
 		} else {
 			db = *D
 		}
-	} else {
-		db = d
 	}
+	db = *D
 
 	if f == "" {
 		if *F == "" {
@@ -66,9 +65,8 @@ func New() *Config {
 		} else {
 			file = *F
 		}
-	} else {
-		file = f
 	}
+	file = *F
 
 	Cnf.BaseURL = baseurl + "/"
 	Cnf.ServerAddress = address
