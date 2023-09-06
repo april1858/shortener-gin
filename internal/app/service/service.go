@@ -8,18 +8,16 @@ import (
 	"github.com/april1858/shortener-gin/internal/app/config"
 )
 
-var UID string
-
 type Repository interface {
-	MemoryStore(short, original string) error
+	MemoryStore(short, original, uid string) error
 	MemoryFind(short string) (string, error)
-	MemoryFindByUID() ([]string, error)
-	FileStore(filename, short, original string) error
+	MemoryFindByUID(uid string) ([]string, error)
+	FileStore(filename, short, original, uid string) error
 	FileFind(filename, short string) (string, error)
-	FileFindByUID(filename string) ([]string, error)
-	DBStore(dsn, short, original string) (string, error)
+	FileFindByUID(filename, uid string) ([]string, error)
+	DBStore(dsn, short, original, uid string) (string, error)
 	DBFind(dsn, shorturl string) (string, error)
-	DBFindByUID(dsn string) ([]string, error)
+	DBFindByUID(dsn, uid string) ([]string, error)
 	Ping(dsn string) (string, error)
 	BulkInsert(string, []map[string]string) error
 }
@@ -36,7 +34,7 @@ func New(r Repository, c config.Config) *Service {
 	}
 }
 
-func (s *Service) CreatorShortened(originalURL string) (string, error) {
+func (s *Service) CreatorShortened(originalURL, uid string) (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -44,20 +42,20 @@ func (s *Service) CreatorShortened(originalURL string) (string, error) {
 	}
 	switch {
 	case s.c.FileStoragePath != "":
-		s.r.FileStore(s.c.FileStoragePath, hex.EncodeToString(b), originalURL)
+		s.r.FileStore(s.c.FileStoragePath, hex.EncodeToString(b), originalURL, uid)
 	case s.c.DatabaseDsn != "":
-		answer, err := s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL)
+		answer, err := s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL, uid)
 		if err != nil {
 			return answer, err
 		}
 	default:
-		s.r.MemoryStore(hex.EncodeToString(b), originalURL)
+		s.r.MemoryStore(hex.EncodeToString(b), originalURL, uid)
 	}
 
 	return hex.EncodeToString(b), nil
 }
 
-func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
+func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) []string {
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
 
@@ -68,10 +66,10 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string) []string {
 		if err != nil {
 			return nil
 		}
-		answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+UID)
+		answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+uid)
 		mp["short_url"] = hex.EncodeToString(b)
 		mp["original_url"] = v["original_url"]
-		mp["uid"] = UID
+		mp["uid"] = uid
 		toDB = append(toDB, mp)
 	}
 	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
@@ -97,18 +95,18 @@ func (s *Service) FindOriginalURL(shortened string) (string, error) {
 	return answer, err
 }
 
-func (s *Service) FindByUID() ([]string, error) {
+func (s *Service) FindByUID(uid string) ([]string, error) {
 	var (
 		answer []string
 		err    error
 	)
 	switch {
 	case s.c.FileStoragePath != "":
-		answer, err = s.r.FileFindByUID(s.c.FileStoragePath)
+		answer, err = s.r.FileFindByUID(s.c.FileStoragePath, uid)
 	case s.c.DatabaseDsn != "":
-		answer, err = s.r.DBFindByUID(s.c.DatabaseDsn)
+		answer, err = s.r.DBFindByUID(s.c.DatabaseDsn, uid)
 	default:
-		answer, err = s.r.MemoryFindByUID()
+		answer, err = s.r.MemoryFindByUID(uid)
 	}
 
 	return answer, err

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -46,11 +45,7 @@ func (r Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool) {
 	return ctx, db
 }
 
-func (r Repository) DBStore(dsn, short, original string) (string, error) {
-	mx := new(sync.RWMutex)
-	mx.Lock()
-	defer mx.Unlock()
-	uid := UID
+func (r Repository) DBStore(dsn, short, original, uid string) (string, error) {
 	ctx, db := r.connectDB(dsn)
 	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
@@ -89,10 +84,10 @@ func (r Repository) DBFind(dsn, shorturl string) (string, error) {
 	return answer, nil
 }
 
-func (r Repository) DBFindByUID(dsn string) ([]string, error) {
+func (r Repository) DBFindByUID(dsn, uid string) ([]string, error) {
 	var answer []string
 	ctx, db := r.connectDB(dsn)
-	row := db.QueryRow(ctx, `select original_url from "shortener" where uid=UID`)
+	row := db.QueryRow(ctx, `select original_url from "shortener" where uid=uid`)
 	err := row.Scan(&answer)
 	if err != nil {
 		return nil, err

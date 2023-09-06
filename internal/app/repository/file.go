@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func (r *Repository) FileStore(filename, short, original string) error {
+func (r *Repository) FileStore(filename, short, original, uid string) error {
 	mx := new(sync.RWMutex)
 	mx.Lock()
 	defer mx.Unlock()
@@ -25,7 +25,7 @@ func (r *Repository) FileStore(filename, short, original string) error {
 			return err
 		}
 		json.Unmarshal(content, &M)
-		M = append(M, short+" "+original+" "+UID)
+		M = append(M, short+" "+original+" "+uid)
 	}
 
 	data, err := json.Marshal(M)
@@ -59,7 +59,7 @@ func (r Repository) FileFind(filename, short string) (string, error) {
 	return "", nil
 }
 
-func (r *Repository) FileFindByUID(filename string) ([]string, error) {
+func (r *Repository) FileFindByUID(filename, uid string) ([]string, error) {
 	fileData, err := os.ReadFile(filename)
 	if err != nil {
 		log.Println("error ", err)
@@ -70,7 +70,7 @@ func (r *Repository) FileFindByUID(filename string) ([]string, error) {
 	answer := make([]string, 0, 4)
 	for _, value := range parseData {
 		var v = strings.Fields(value)
-		if UID == v[2] {
+		if uid == v[2] {
 			answer = append(answer, v[0]+" "+v[1])
 		}
 	}
