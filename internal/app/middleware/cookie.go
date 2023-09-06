@@ -41,6 +41,7 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 			fmt.Println("err from Cookie() ", err)
 		}
 		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", false, false)
+		c.Set("UID", cookie.Value)
 		c.Next()
 	}
 }
