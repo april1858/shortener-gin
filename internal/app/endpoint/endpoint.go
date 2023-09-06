@@ -51,7 +51,6 @@ func (e *Endpoint) CreateShortened(c *gin.Context) {
 }
 
 func (e *Endpoint) GetOriginalURL(c *gin.Context) {
-	fmt.Println("1. GetOriginalURL")
 	shortened := c.Param("id")
 	answer, err := e.S.FindOriginalURL(shortened)
 	if err != nil {
@@ -63,6 +62,7 @@ func (e *Endpoint) GetOriginalURL(c *gin.Context) {
 }
 
 func (e *Endpoint) GetAllUID(c *gin.Context) {
+	fmt.Println("c.MustGet().(string)", c.MustGet("UID").(string))
 	sliceAll, err := e.S.FindByUID(c.MustGet("UID").(string))
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)

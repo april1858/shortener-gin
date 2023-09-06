@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -34,6 +35,8 @@ func (r *Repository) MemoryFind(short string) (string, error) {
 }
 
 func (r *Repository) MemoryFindByUID(uid string) ([]string, error) {
+	fmt.Println("m uid ", uid)
+	fmt.Println("M ", M)
 	answer := make([]string, 0, 4)
 	for _, value := range M {
 		var v = strings.Fields(value)

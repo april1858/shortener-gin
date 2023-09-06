@@ -36,12 +36,12 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 			return
 		}
 
-		err := WriteSigned()
+		uid, err := WriteSigned()
 		if err != nil {
 			fmt.Println("err from Cookie() ", err)
 		}
 		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", false, false)
-		c.Set("UID", cookie.Value)
+		c.Set("UID", uid)
 		c.Next()
 	}
 }
@@ -69,15 +69,16 @@ func ReadSigned(sValue string) (string, error) {
 	return string(value), nil
 }
 
-func WriteSigned() error {
-	cookie.Value = createCode()
+func WriteSigned() (string, error) {
+	uid := createCode()
+	cookie.Value = uid
 	mac := hmac.New(sha256.New, secretKey)
 	mac.Write([]byte(cookie.Name))
 	mac.Write([]byte(cookie.Value))
 	signature := mac.Sum(nil)
 	cookie.Value = string(signature) + cookie.Value
 	cookie.Value = base64.URLEncoding.EncodeToString([]byte(cookie.Value))
-	return nil
+	return uid, nil
 }
 
 func createCode() string {

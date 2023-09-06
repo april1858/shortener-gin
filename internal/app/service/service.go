@@ -106,6 +106,7 @@ func (s *Service) FindByUID(uid string) ([]string, error) {
 	case s.c.DatabaseDsn != "":
 		answer, err = s.r.DBFindByUID(s.c.DatabaseDsn, uid)
 	default:
+		fmt.Println("uid - ", uid)
 		answer, err = s.r.MemoryFindByUID(uid)
 	}
 
