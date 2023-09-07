@@ -21,6 +21,7 @@ func (mw *MW) GZIP() gin.HandlerFunc {
 		}
 		fmt.Println("Accept[] - ", c.Accepted)
 		if c.GetHeader("Accept-Encoding") == "gzip, deflate, br" {
+			fmt.Println("Accept[1] - ", c.Accepted)
 			gzip.Gzip(gzip.DefaultCompression)
 			fmt.Println("Accept[2] - ", c.Accepted)
 		}
