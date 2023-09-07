@@ -12,44 +12,44 @@ import (
 )
 
 type App struct {
-	e  *endpoint.Endpoint
-	rp *repository.Repository
-	s  *service.Service
-	r  *gin.Engine
-	c  *config.Config
-	mw *middleware.MW
+	e      *endpoint.Endpoint
+	repo   *repository.Repository
+	s      *service.Service
+	route  *gin.Engine
+	config *config.Config
+	mw     *middleware.MW
 }
 
 func New() (*App, error) {
 	a := &App{}
 
-	a.c = config.New()
+	a.config = config.New()
 
-	a.rp = repository.New()
+	a.repo = repository.New(a.config)
 
-	a.s = service.New(a.rp, *a.c)
+	a.s = service.New(a.repo, *a.config)
 
 	a.e = endpoint.New(a.s)
 
 	a.mw = middleware.New()
 
 	gin.SetMode(gin.ReleaseMode)
-	a.r = gin.Default()
+	a.route = gin.Default()
 
-	a.r.Use(a.mw.Cookie(), a.mw.GZIP())
-	a.r.POST("/", a.e.CreateShortened)
-	a.r.POST("/api/shorten", a.e.JSONCreateShortened)
-	a.r.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
-	a.r.GET("/:id", a.e.GetOriginalURL)
-	a.r.GET("/api/user/urls", a.e.GetAllUID)
-	a.r.GET("/ping", a.e.Ping)
+	a.route.Use(a.mw.Cookie(), a.mw.GZIP())
+	a.route.POST("/", a.e.CreateShortened)
+	a.route.POST("/api/shorten", a.e.JSONCreateShortened)
+	a.route.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
+	a.route.GET("/:id", a.e.GetOriginalURL)
+	a.route.GET("/api/user/urls", a.e.GetAllUID)
+	a.route.GET("/ping", a.e.Ping)
 
 	return a, nil
 }
 
 func (a *App) Run() error {
 	fmt.Println("server running")
-	a.r.Run(a.c.ServerAddress)
+	a.route.Run(a.config.ServerAddress)
 
 	return nil
 }
