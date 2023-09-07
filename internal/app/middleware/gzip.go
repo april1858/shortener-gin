@@ -22,7 +22,10 @@ func (mw *MW) GZIP() gin.HandlerFunc {
 		fmt.Println("Accept[] - ", c.Accepted)
 		if c.GetHeader("Accept-Encoding") == "gzip, deflate, br" {
 			gzip.Gzip(gzip.DefaultCompression)
+			fmt.Println("Accept[2] - ", c.Accepted)
 		}
+		fmt.Println("Accept[3] - ", c.Accepted)
 		c.Next()
+		fmt.Println("Accept[4] - ", c.Accepted)
 	}
 }
