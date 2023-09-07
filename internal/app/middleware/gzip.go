@@ -17,7 +17,7 @@ func (mw *MW) GZIP() gin.HandlerFunc {
 		if c.GetHeader("Content-Encoding") == "gzip" {
 			gzip.DefaultDecompressHandle(c)
 		}
-		if c.GetHeader("Accept-Encoding") == "gzip" {
+		if c.GetHeader("Accept-Encoding") == "gzip, deflate, br" {
 			gzip.Gzip(gzip.DefaultCompression)
 		}
 		c.Next()
