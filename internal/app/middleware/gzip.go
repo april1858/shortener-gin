@@ -14,10 +14,10 @@ func New() *MW {
 
 func (mw *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader("Accept-Encoding") == "gzip" {
-			if c.GetHeader("Content-Encoding") == "gzip" {
-				gzip.DefaultDecompressHandle(c)
-			}
+		if c.GetHeader("Content-Encoding") == "gzip, deflate, br" {
+			gzip.DefaultDecompressHandle(c)
+		}
+		if c.GetHeader("Accept-Encoding") == "gzip, deflate, br" {
 			gzip.Gzip(gzip.DefaultCompression)
 		}
 		c.Next()
