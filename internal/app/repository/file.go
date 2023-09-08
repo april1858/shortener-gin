@@ -5,13 +5,11 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 )
 
 func (r *Repository) FileStore(filename, short, original, uid string) error {
-	mx := new(sync.RWMutex)
-	mx.Lock()
-	defer mx.Unlock()
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	_, err := os.Stat(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -41,7 +39,9 @@ func (r *Repository) FileStore(filename, short, original, uid string) error {
 	return nil
 }
 
-func (r Repository) FileFind(filename, short string) (string, error) {
+func (r *Repository) FileFind(filename, short string) (string, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	fileData, err := os.ReadFile(filename)
 	if err != nil {
 		log.Println("error ", err)
@@ -60,6 +60,8 @@ func (r Repository) FileFind(filename, short string) (string, error) {
 }
 
 func (r *Repository) FileFindByUID(filename, uid string) ([]string, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	fileData, err := os.ReadFile(filename)
 	if err != nil {
 		log.Println("error ", err)

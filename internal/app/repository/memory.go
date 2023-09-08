@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -16,6 +15,7 @@ var M = make([]string, 0, 1)
 type Repository struct {
 	ctx context.Context
 	db  *pgxpool.Pool
+	mx  sync.RWMutex
 }
 
 func New(cnf *config.Config) *Repository {
@@ -43,18 +43,19 @@ func New(cnf *config.Config) *Repository {
 		ctx: nil,
 		db:  nil,
 	}
-
 }
 
 func (r *Repository) MemoryStore(short, original, uid string) error {
-	mx := new(sync.RWMutex)
-	mx.Lock()
-	defer mx.Unlock()
+
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	M = append(M, short+" "+original+" "+uid)
 	return nil
 }
 
 func (r *Repository) MemoryFind(short string) (string, error) {
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	for _, value := range M {
 		var v = strings.Fields(value)
 		if short == v[0] {
@@ -65,8 +66,8 @@ func (r *Repository) MemoryFind(short string) (string, error) {
 }
 
 func (r *Repository) MemoryFindByUID(uid string) ([]string, error) {
-	fmt.Println("m uid ", uid)
-	fmt.Println("M ", M)
+	r.mx.Lock()
+	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
 	for _, value := range M {
 		var v = strings.Fields(value)
