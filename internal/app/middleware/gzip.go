@@ -20,8 +20,8 @@ func (mw *MW) GZIP() gin.HandlerFunc {
 		if c.GetHeader("Content-Encoding") == "gzip" {
 			gzip.DefaultDecompressHandle(c)
 		}
-		if c.GetHeader("Accept-Encoding") == "gzip" {
-			gzip.Gzip(gzip.DefaultCompression)
+		if c.GetHeader("Accept-Encoding") == "gzip, compress" {
+			gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp4", ".png", ".gif", ".jpeg", ".jpg", ".webp"}))
 		}
 		c.Next()
 	}

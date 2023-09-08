@@ -48,7 +48,7 @@ func (r *Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool, erro
 func (r *Repository) DBStore(dsn, short, original, uid string) (string, error) {
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
-
+		return "", err
 	}
 	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
@@ -70,7 +70,7 @@ func (r *Repository) DBStore(dsn, short, original, uid string) (string, error) {
 func (r *Repository) StoreBatch(dsn string, batch []map[string]string) error {
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
-
+		return err
 	}
 	_, err = db.Exec(ctx, `INSERT INTO shortener (uid, short_url, original_url) VALUES ($1, $2, $3)`, batch)
 	if err != nil {
@@ -83,7 +83,7 @@ func (r *Repository) DBFind(dsn, shorturl string) (string, error) {
 	var answer string
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
-
+		return "", err
 	}
 	row := db.QueryRow(ctx, `select original_url from "shortener" where short_url=$1`, shorturl)
 	err = row.Scan(&answer)
@@ -97,7 +97,7 @@ func (r *Repository) DBFindByUID(dsn, uid string) ([]string, error) {
 	var answer []string
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
-
+		return nil, err
 	}
 	row := db.QueryRow(ctx, `select original_url from "shortener" where uid=uid`)
 	err = row.Scan(&answer)
@@ -110,7 +110,7 @@ func (r *Repository) DBFindByUID(dsn, uid string) ([]string, error) {
 func (r *Repository) BulkInsert(dsn string, bulks []map[string]string) error {
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
-
+		return err
 	}
 	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
 	batch := &pgx.Batch{}
