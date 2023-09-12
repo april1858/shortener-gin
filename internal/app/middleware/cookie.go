@@ -17,19 +17,18 @@ var (
 	ErrValueTooLong = errors.New("cookie value too long")
 	ErrInvalidValue = errors.New("invalid cookie value")
 	secretKey       = []byte("12345")
-	cookie          = http.Cookie{
-		Name:  "UID",
-		Value: "",
-	}
+	cookie          http.Cookie
 )
 
 func (mw *MW) Cookie() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		mw.mx.Lock()
+		defer mw.mx.Unlock()
 		// Get cookie
 		if signedValue, err := c.Cookie("UID"); err == nil {
 			value, err := ReadSigned(signedValue)
 			if err != nil {
-				fmt.Println("err err - ", err)
+				fmt.Println("error from ReadSigned - ", err)
 			}
 			c.Set("UID", value)
 			c.Next()
@@ -38,7 +37,7 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 
 		uid, err := WriteSigned()
 		if err != nil {
-			fmt.Println("err from Cookie() ", err)
+			fmt.Println("error from WriteSigned - ", err)
 		}
 		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", false, false)
 		c.Set("UID", uid)
@@ -58,8 +57,14 @@ func ReadSigned(sValue string) (string, error) {
 	value := signedValue[sha256.Size:]
 
 	mac := hmac.New(sha256.New, secretKey)
-	mac.Write([]byte("UID"))
-	mac.Write([]byte(value))
+	_, err = mac.Write([]byte("UID"))
+	if err != nil {
+		return "", err
+	}
+	_, err = mac.Write([]byte(value))
+	if err != nil {
+		return "", err
+	}
 	expectedSignature := mac.Sum(nil)
 
 	if !hmac.Equal([]byte(signature), expectedSignature) {
@@ -73,8 +78,14 @@ func WriteSigned() (string, error) {
 	uid := createCode()
 	cookie.Value = uid
 	mac := hmac.New(sha256.New, secretKey)
-	mac.Write([]byte(cookie.Name))
-	mac.Write([]byte(cookie.Value))
+	_, err := mac.Write([]byte(cookie.Name))
+	if err != nil {
+		return "", err
+	}
+	_, err = mac.Write([]byte(cookie.Value))
+	if err != nil {
+		return "", err
+	}
 	signature := mac.Sum(nil)
 	cookie.Value = string(signature) + cookie.Value
 	cookie.Value = base64.URLEncoding.EncodeToString([]byte(cookie.Value))

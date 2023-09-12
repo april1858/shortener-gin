@@ -9,6 +9,15 @@ import (
 )
 
 type Repository interface {
+	Store(short, original, uid, string) error
+	Find(short string) (string, error)
+	FindByUID(uid string) ([]string, error)
+	StoreBatch(string, []map[string]string) error
+	Ping(dsn string) (string, error)
+}
+
+/*
+type Repository interface {
 	MemoryStore(short, original, uid string) error
 	MemoryFind(short string) (string, error)
 	MemoryFindByUID(uid string) ([]string, error)

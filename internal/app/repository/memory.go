@@ -45,6 +45,19 @@ func New(cnf *config.Config) *Repository {
 	}
 }
 
+func (r *Repository) Store(short, original, uid string) error {
+	switch {
+	case s.c.FileStoragePath != "":
+		answer, err = s.r.FileFind(s.c.FileStoragePath, shortened)
+	case s.c.DatabaseDsn != "":
+		answer, err = s.r.DBFind(s.c.DatabaseDsn, shortened)
+	default:
+		answer, err = s.r.MemoryFind(shortened)
+	}
+	return answer, err
+}
+}
+
 func (r *Repository) MemoryStore(short, original, uid string) error {
 
 	r.mx.Lock()
