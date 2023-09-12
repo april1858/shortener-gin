@@ -48,14 +48,26 @@ func New(cnf *config.Config) *Repository {
 func (r *Repository) Store(short, original, uid string) error {
 	switch {
 	case s.c.FileStoragePath != "":
-		answer, err = s.r.FileFind(s.c.FileStoragePath, shortened)
+		answer, err = r.FileStore(s.c.FileStoragePath, shortened)
 	case s.c.DatabaseDsn != "":
-		answer, err = s.r.DBFind(s.c.DatabaseDsn, shortened)
+		answer, err = r.DBStore(s.c.DatabaseDsn, shortened)
 	default:
-		answer, err = s.r.MemoryFind(shortened)
+		answer, err = r.MemoryStore(short, original, uid)
 	}
 	return answer, err
 }
+
+func (r *Repository) Find(short string) (string, error) {
+	switch {
+	case s.c.FileStoragePath != "":
+		answer, err = r.FileFind(short)
+	case s.c.DatabaseDsn != "":
+		answer, err = r.DBFind(short)
+	default:
+		answer, err = r.MemoryFind(short
+		)
+	}
+	return answer, err
 }
 
 func (r *Repository) MemoryStore(short, original, uid string) error {

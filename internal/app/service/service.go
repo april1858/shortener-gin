@@ -16,30 +16,13 @@ type Repository interface {
 	Ping(dsn string) (string, error)
 }
 
-/*
-type Repository interface {
-	MemoryStore(short, original, uid string) error
-	MemoryFind(short string) (string, error)
-	MemoryFindByUID(uid string) ([]string, error)
-	FileStore(filename, short, original, uid string) error
-	FileFind(filename, short string) (string, error)
-	FileFindByUID(filename, uid string) ([]string, error)
-	DBStore(dsn, short, original, uid string) (string, error)
-	DBFind(dsn, shorturl string) (string, error)
-	DBFindByUID(dsn, uid string) ([]string, error)
-	Ping(dsn string) (string, error)
-	BulkInsert(string, []map[string]string) error
-}
-
 type Service struct {
 	r Repository
-	c config.Config
 }
 
-func New(r Repository, c config.Config) *Service {
+func New(r Repository) *Service {
 	return &Service{
 		r: r,
-		c: c,
 	}
 }
 
@@ -49,18 +32,7 @@ func (s *Service) CreatorShortened(originalURL, uid string) (string, error) {
 	if err != nil {
 		return "error in CreatorShortened()", err
 	}
-	switch {
-	case s.c.FileStoragePath != "":
-		s.r.FileStore(s.c.FileStoragePath, hex.EncodeToString(b), originalURL, uid)
-	case s.c.DatabaseDsn != "":
-		answer, err := s.r.DBStore(s.c.DatabaseDsn, hex.EncodeToString(b), originalURL, uid)
-		if err != nil {
-			return answer, err
-		}
-	default:
-		s.r.MemoryStore(hex.EncodeToString(b), originalURL, uid)
-	}
-
+	s.r.Store(hex.EncodeToString(b), originalURL, uid)
 	return hex.EncodeToString(b), nil
 }
 
@@ -81,7 +53,7 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) [
 		mp["uid"] = uid
 		toDB = append(toDB, mp)
 	}
-	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
+	err := s.r.StoreBatch(s.c.DatabaseDsn, toDB)
 	if err != nil {
 		fmt.Println("err from service - ", err)
 	}
@@ -93,14 +65,7 @@ func (s *Service) FindOriginalURL(shortened string) (string, error) {
 		answer string
 		err    error
 	)
-	switch {
-	case s.c.FileStoragePath != "":
-		answer, err = s.r.FileFind(s.c.FileStoragePath, shortened)
-	case s.c.DatabaseDsn != "":
-		answer, err = s.r.DBFind(s.c.DatabaseDsn, shortened)
-	default:
-		answer, err = s.r.MemoryFind(shortened)
-	}
+	answer, err = s.r.Find(shortened)
 	return answer, err
 }
 
@@ -109,21 +74,12 @@ func (s *Service) FindByUID(uid string) ([]string, error) {
 		answer []string
 		err    error
 	)
-	switch {
-	case s.c.FileStoragePath != "":
-		answer, err = s.r.FileFindByUID(s.c.FileStoragePath, uid)
-	case s.c.DatabaseDsn != "":
-		answer, err = s.r.DBFindByUID(s.c.DatabaseDsn, uid)
-	default:
-		fmt.Println("uid - ", uid)
-		answer, err = s.r.MemoryFindByUID(uid)
-	}
-
+	answer, err = s.r.FindByUID(uid)
 	return answer, err
 }
 
 func (s *Service) Ping() (string, error) {
-	answer, err := s.r.Ping(s.c.DatabaseDsn)
+	answer, err := s.r.Ping()
 
 	return answer, err
 }

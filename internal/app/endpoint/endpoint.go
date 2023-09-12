@@ -141,5 +141,4 @@ func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 		return
 	}
 	c.Data(http.StatusCreated, "application/json", []byte(answer1))
-
 }
