@@ -1,37 +1,42 @@
 package repository
 
 import (
-	"context"
 	"errors"
+	"log"
 	"strings"
 	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var memory = make([]string, 0, 1)
 
 type Repository struct {
-	mx  sync.RWMutex
+	mx      sync.RWMutex
+	connPGS *pgxpool.Pool
 }
 
 func New() *Repository {
-	connectDB(ctx *gin.Context, dsn string) (*pgxpool.Pool, error) {
+	if config.Cnf.DatabaseDsn != "" {
+		var ctx *gin.Context
+		var db *pgxpool.Pool
 		poolConfig, err := pgxpool.ParseConfig(config.Cnf.DatabaseDsn)
 		if err != nil {
 			log.Fatalln("Unable to parse DATABASE_DSN:", err)
 		}
-		db, err := pgxpool.NewWithConfig(ctx, poolConfig)
+		db, err = pgxpool.NewWithConfig(ctx, poolConfig)
 		if err != nil {
 			log.Fatalln("Unable to create connection pool:", err)
 		}
 		_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 		if err != nil {
-			return nil, nil, err
+			log.Fatal("Not create table - ", err)
 		}
-		return db, nil
+		return &Repository{
+			connPGS: db,
+		}
 	}
 
 	return &Repository{}

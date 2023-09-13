@@ -6,25 +6,26 @@ import (
 	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
-
 	"github.com/gin-gonic/gin"
 )
 
 type Repository interface {
-	Store(ctx *gin.Context, short, original string) error
-	Find(short string) (string, error)
-	FindByUID(uid string) ([]string, error)
+	Store(ctx *gin.Context, short, originsl string) error
+	Find(ctx *gin.Context, short string) (string, error)
+	FindByUID(ctx *gin.Context) ([]string, error)
 	StoreBatch(string, []map[string]string) error
-	Ping(ctx *gin.Context, dsn string) (string, error)
+	Ping(dsn string) (string, error)
 }
 
 type Service struct {
 	r Repository
+	c config.Config
 }
 
-func New(r Repository) *Service {
+func New(r Repository, c config.Config) *Service {
 	return &Service{
 		r: r,
+		c: c,
 	}
 }
 
@@ -36,6 +37,9 @@ func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string
 	}
 	short := hex.EncodeToString(b)
 	err = s.r.Store(ctx, short, originalURL)
+	if err != nil {
+		return "", err
+	}
 	return short, nil
 }
 
@@ -56,33 +60,26 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) [
 		mp["uid"] = uid
 		toDB = append(toDB, mp)
 	}
-	err := s.r.StoreBatch(s.c.DatabaseDsn, toDB)
+	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
 	if err != nil {
 		fmt.Println("err from service - ", err)
 	}
 	return answer
 }
 
-func (s *Service) FindOriginalURL(shortened string) (string, error) {
-	var (
-		answer string
-		err    error
-	)
-	answer, err = s.r.Find(shortened)
+func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, error) {
+	answer, err := s.r.Find(ctx, shortened)
 	return answer, err
 }
 
-func (s *Service) FindByUID(uid string) ([]string, error) {
-	var (
-		answer []string
-		err    error
-	)
-	answer, err = s.r.FindByUID(uid)
+func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
+	answer, err := s.r.FindByUID(ctx)
+
 	return answer, err
 }
 
-func (s *Service) Ping(ctx *gin.Context) (string, error) {
-	answer, err := s.r.Ping(ctx)
+func (s *Service) Ping() (string, error) {
+	answer, err := s.r.Ping(s.c.DatabaseDsn)
 
 	return answer, err
 }

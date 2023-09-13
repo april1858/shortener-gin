@@ -18,8 +18,8 @@ type Redirect struct {
 }
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
-	FindOriginalURL(string) (string, error)
-	FindByUID(uid string) ([]string, error)
+	FindOriginalURL(*gin.Context, string) (string, error)
+	FindByUID(ctx *gin.Context) ([]string, error)
 	Ping(ctx *gin.Context) (string, error)
 	CreatorShortenedBatch([]map[string]string, string) []string
 }
@@ -52,21 +52,20 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
-	answer, err := e.s.FindOriginalURL(shortened, ctx)
+	answer, err := e.s.FindOriginalURL(ctx, shortened)
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
-		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
+		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
-		c.Redirect(http.StatusTemporaryRedirect, answer)
+		ctx.Redirect(http.StatusTemporaryRedirect, answer)
 	}
 }
 
-func (e *Endpoint) GetAllUID(c *gin.Context) {
-	fmt.Println("c.MustGet().(string)", c.MustGet("UID").(string))
-	sliceAll, err := e.S.FindByUID(c.MustGet("UID").(string))
+func (e *Endpoint) GetAllUID(ctx *gin.Context) {
+	sliceAll, err := e.s.FindByUID(ctx)
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
-		c.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
+		ctx.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
 	} else {
 		var redirect = make([]Redirect, 0, 1)
 		var r Redirect
@@ -80,8 +79,8 @@ func (e *Endpoint) GetAllUID(c *gin.Context) {
 		if err != nil {
 			return
 		}
-		c.Header("WWW-Authenticate", `Basic realm="api"`)
-		c.Data(http.StatusOK, "text/plain application/json", answer)
+		ctx.Header("WWW-Authenticate", `Basic realm="api"`)
+		ctx.Data(http.StatusOK, "text/plain application/json", answer)
 	}
 }
 
