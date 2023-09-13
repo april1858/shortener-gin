@@ -17,42 +17,42 @@ type Redirect struct {
 	OriginalURL string `json:"original_url"`
 }
 type Service interface {
-	CreatorShortened(string, string) (string, error)
+	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(string) (string, error)
 	FindByUID(uid string) ([]string, error)
-	Ping() (string, error)
+	Ping(ctx *gin.Context) (string, error)
 	CreatorShortenedBatch([]map[string]string, string) []string
 }
 
 type Endpoint struct {
-	S Service
+	s Service
 }
 
 func New(s Service) *Endpoint {
 	return &Endpoint{
-		S: s,
+		s: s,
 	}
 }
 
-func (e *Endpoint) CreateShortened(c *gin.Context) {
+func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	contentType := "text/plain"
 	var status int = http.StatusCreated
-	originalURL, _ := c.GetRawData()
+	originalURL, _ := ctx.GetRawData()
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
-		c.Data(http.StatusBadRequest, "text/plain", []byte("Не правильный URL"))
+		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Не правильный URL"))
 	} else {
-		shortened, err := e.S.CreatorShortened(string(originalURL), c.MustGet("UID").(string))
+		shortened, err := e.s.CreatorShortened(ctx, string(originalURL))
 		if err != nil {
 			status = http.StatusConflict
 		}
-		c.Data(status, contentType, []byte(config.Cnf.BaseURL+shortened))
+		ctx.Data(status, contentType, []byte(config.Cnf.BaseURL+shortened))
 	}
 }
 
-func (e *Endpoint) GetOriginalURL(c *gin.Context) {
-	shortened := c.Param("id")
-	answer, err := e.S.FindOriginalURL(shortened)
+func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
+	shortened := ctx.Param("id")
+	answer, err := e.s.FindOriginalURL(shortened, ctx)
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		c.Data(http.StatusBadRequest, "text/plain", []byte(s))
@@ -114,12 +114,12 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 	c.Data(status, "application/json", answer)
 }
 
-func (e *Endpoint) Ping(c *gin.Context) {
-	_, err := e.S.Ping()
+func (e *Endpoint) Ping(ctx *gin.Context) {
+	_, err := e.S.Ping(ctx)
 	if err != nil {
 		c.Data(http.StatusInternalServerError, "", nil)
 	}
-	c.Data(http.StatusOK, "", nil)
+	ctx.Data(http.StatusOK, "", nil)
 }
 
 func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {

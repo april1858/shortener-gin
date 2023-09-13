@@ -6,14 +6,16 @@ import (
 	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Repository interface {
-	Store(short, original, uid, string) error
+	Store(ctx *gin.Context, short, original string) error
 	Find(short string) (string, error)
 	FindByUID(uid string) ([]string, error)
 	StoreBatch(string, []map[string]string) error
-	Ping(dsn string) (string, error)
+	Ping(ctx *gin.Context, dsn string) (string, error)
 }
 
 type Service struct {
@@ -26,14 +28,15 @@ func New(r Repository) *Service {
 	}
 }
 
-func (s *Service) CreatorShortened(originalURL, uid string) (string, error) {
+func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
 		return "error in CreatorShortened()", err
 	}
-	s.r.Store(hex.EncodeToString(b), originalURL, uid)
-	return hex.EncodeToString(b), nil
+	short := hex.EncodeToString(b)
+	err = s.r.Store(ctx, short, originalURL)
+	return short, nil
 }
 
 func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) []string {
@@ -78,8 +81,8 @@ func (s *Service) FindByUID(uid string) ([]string, error) {
 	return answer, err
 }
 
-func (s *Service) Ping() (string, error) {
-	answer, err := s.r.Ping()
+func (s *Service) Ping(ctx *gin.Context) (string, error) {
+	answer, err := s.r.Ping(ctx)
 
 	return answer, err
 }

@@ -9,18 +9,20 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/gin-gonic/gin"
 )
 
-func (r *Repository) Ping(dsn string) (string, error) {
-	cx := context.Background()
-	conn, err := pgx.Connect(cx, dsn)
+//_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
+
+func (r *Repository) PGSPing(ctx *gin.Context, dsn string) (string, error) {
+	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
 		return "", err
 	}
 	defer conn.Close(cx)
 	err = conn.Ping(cx)
 	if err != nil {
-		fmt.Println("Panic")
+		fmt.Println("Not connecting!")
 		return "", err
 	} else {
 		fmt.Println("Yes, connecting!")
@@ -28,8 +30,7 @@ func (r *Repository) Ping(dsn string) (string, error) {
 	return "Conn", nil
 }
 
-func (r *Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool, error) {
-	ctx := context.Background()
+func (r *Repository) connectDB(ctx *gin.Context, dsn string) (*pgxpool.Pool, error) {
 	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		log.Fatalln("Unable to parse DATABASE_DSN:", err)
@@ -42,11 +43,11 @@ func (r *Repository) connectDB(dsn string) (context.Context, *pgxpool.Pool, erro
 	if err != nil {
 		return nil, nil, err
 	}
-	return ctx, db, nil
+	return db, nil
 }
 
-func (r *Repository) DBStore(dsn, short, original, uid string) (string, error) {
-	ctx, db, err := r.connectDB(dsn)
+func (r *Repository) PGSStore(ctx *gin.Context,dsn, short, original, uid string) (string, error) {
+	db, err := r.connectDB(ctx, dsn)
 	if err != nil {
 		return "", err
 	}
@@ -79,7 +80,7 @@ func (r *Repository) StoreBatch(dsn string, batch []map[string]string) error {
 	return nil
 }
 
-func (r *Repository) DBFind(dsn, shorturl string) (string, error) {
+func (r *Repository) PGSFind(dsn, shorturl string) (string, error) {
 	var answer string
 	ctx, db, err := r.connectDB(dsn)
 	if err != nil {
