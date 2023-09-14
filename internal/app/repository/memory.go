@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
@@ -51,6 +52,7 @@ func (r *Repository) Ping(ctx *gin.Context) (string, error) {
 }
 
 func (r *Repository) Store(ctx *gin.Context, short, original string) (string, error) {
+	fmt.Println("ctx r - ",ctx)
 	var err error
 	uid := ctx.MustGet("UID").(string)
 	switch {

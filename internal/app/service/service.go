@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/april1858/shortener-gin/internal/app/config"
+	//"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,17 +19,18 @@ type Repository interface {
 
 type Service struct {
 	r Repository
-	c config.Config
+	//c config.Config
 }
 
-func New(r Repository, c config.Config) *Service {
+func New(r Repository) *Service {
 	return &Service{
 		r: r,
-		c: c,
+		//c: c,
 	}
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
+	fmt.Println("ctx s - ",ctx)
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {

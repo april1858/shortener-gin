@@ -35,6 +35,7 @@ func New(s Service) *Endpoint {
 }
 
 func (e *Endpoint) CreateShortened(ctx *gin.Context) {
+	fmt.Println("ctx e - ",ctx)
 	contentType := "text/plain"
 	var status int = http.StatusCreated
 	originalURL, _ := ctx.GetRawData()

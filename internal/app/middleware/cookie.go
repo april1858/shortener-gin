@@ -26,21 +26,23 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 		defer mw.mx.Unlock()
 		// Get cookie
 		if signedValue, err := c.Cookie("UID"); err == nil {
-			value, err := ReadSigned(signedValue)
+			_, err := ReadSigned(signedValue)
 			if err != nil {
 				fmt.Println("error from ReadSigned - ", err)
 			}
-			c.Set("UID", value)
+			//c.Set("UID", value)
 			c.Next()
 			return
 		}
 
-		uid, err := WriteSigned()
+		_, err := WriteSigned()
+		fmt.Println("Get cookie - ", cookie.Name, "+",cookie.Value)
 		if err != nil {
 			fmt.Println("error from WriteSigned - ", err)
 		}
-		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", false, false)
-		c.Set("UID", uid)
+		cookie.Value = "UID"
+		c.SetCookie(cookie.Value, cookie.Value, 3600, "/", "", false, false)
+		//c.Set("UID", uid)
 		c.Next()
 	}
 }

@@ -27,7 +27,7 @@ func New() (*App, error) {
 
 	a.repo = repository.New()
 
-	a.s = service.New(a.repo, *a.config)
+	a.s = service.New(a.repo)
 
 	a.e = endpoint.New(a.s)
 
