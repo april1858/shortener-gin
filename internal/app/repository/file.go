@@ -15,18 +15,18 @@ func (r *Repository) FileStore(filename, short, original, uid string) error {
 		if os.IsNotExist(err) {
 			os.OpenFile(filename, os.O_CREATE, 0777)
 		}
-		M = append(M, short+" "+original)
+		memory = append(memory, short+" "+original)
 	} else {
 		content, err := os.ReadFile(filename)
 		if err != nil {
 			log.Println("error - ", err)
 			return err
 		}
-		json.Unmarshal(content, &M)
-		M = append(M, short+" "+original+" "+uid)
+		json.Unmarshal(content, &memory)
+		memory = append(memory, short+" "+original+" "+uid)
 	}
 
-	data, err := json.Marshal(M)
+	data, err := json.Marshal(memory)
 	if err != nil {
 		log.Println("error ", err)
 		return err

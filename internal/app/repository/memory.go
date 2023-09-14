@@ -60,7 +60,7 @@ func (r *Repository) Store(ctx *gin.Context, short, original string) (string, er
 			return "", err
 		}
 	case config.Cnf.DatabaseDsn != "":
-		isShort, err := r.PGSStore(ctx, config.Cnf.DatabaseDsn, short, original, uid)
+		isShort, err := r.PGSStore(ctx, short, original, uid)
 		if err != nil {
 			return isShort, err
 		}
@@ -73,16 +73,46 @@ func (r *Repository) Store(ctx *gin.Context, short, original string) (string, er
 	return "", nil
 }
 
-func (r *Repository) Find(short string) (string, error) {
+func (r *Repository) Find(ctx *gin.Context, short string) (string, error) {
+	var answer string
+	var err error
 	switch {
 	case config.Cnf.FileStoragePath != "":
-		answer, err = r.FileFind(short)
+		answer, err = r.FileFind(config.Cnf.FileStoragePath, short)
 	case config.Cnf.DatabaseDsn != "":
-		answer, err = r.PGSFind(short)
+		answer, err = r.PGSFind(ctx, short)
 	default:
 		answer, err = r.MemoryFind(short)
 	}
 	return answer, err
+}
+
+func (r *Repository) FindByUID(ctx *gin.Context) ([]string, error) {
+	var answer []string
+	var err error
+	uid := ctx.MustGet("UID").(string)
+	switch {
+	case config.Cnf.FileStoragePath != "":
+		answer, err = r.FileFindByUID(config.Cnf.FileStoragePath, uid)
+	case config.Cnf.DatabaseDsn != "":
+		answer, err = r.PGSFindByUID(ctx, uid)
+	default:
+		answer, err = r.MemoryFindByUID(uid)
+	}
+	return answer, err
+}
+
+func (r *Repository) StoreBatch(ctx *gin.Context, batch []map[string]string) error {
+	var err error
+	switch {
+	case config.Cnf.FileStoragePath != "":
+		err = errors.New("pass")
+	case config.Cnf.DatabaseDsn != "":
+		err = r.PGSStoreBatch(ctx, batch)
+	default:
+		err = errors.New("pass")
+	}
+	return err
 }
 
 func (r *Repository) MemoryStore(short, original, uid string) error {
@@ -95,7 +125,7 @@ func (r *Repository) MemoryStore(short, original, uid string) error {
 func (r *Repository) MemoryFind(short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	for _, value := range M {
+	for _, value := range memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
 			return v[1], nil
@@ -108,7 +138,7 @@ func (r *Repository) MemoryFindByUID(uid string) ([]string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
-	for _, value := range M {
+	for _, value := range memory {
 		var v = strings.Fields(value)
 		if uid == v[2] {
 			answer = append(answer, v[0]+" "+v[1])

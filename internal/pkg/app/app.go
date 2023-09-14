@@ -25,7 +25,7 @@ func New() (*App, error) {
 
 	a.config = config.New()
 
-	a.repo = repository.New(a.config)
+	a.repo = repository.New()
 
 	a.s = service.New(a.repo, *a.config)
 

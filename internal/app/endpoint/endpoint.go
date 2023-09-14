@@ -19,9 +19,9 @@ type Redirect struct {
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
-	FindByUID(ctx *gin.Context) ([]string, error)
-	Ping(ctx *gin.Context) (string, error)
-	CreatorShortenedBatch([]map[string]string, string) []string
+	FindByUID(*gin.Context) ([]string, error)
+	Ping(*gin.Context) (string, error)
+	CreatorShortenedBatch(*gin.Context, []map[string]string) []string
 }
 
 type Endpoint struct {
@@ -84,11 +84,11 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 	}
 }
 
-func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
+func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 	var shortened string
 	var status int = http.StatusCreated
 	objQuery := make(map[string]string)
-	requestBody, _ := c.GetRawData()
+	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
 		return
@@ -96,9 +96,9 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 
 	_, err := url.ParseRequestURI(objQuery["url"])
 	if err != nil {
-		c.Data(http.StatusBadRequest, "application/json", []byte("Не правильный URL"))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("Не правильный URL"))
 	} else {
-		shortened, err = e.S.CreatorShortened(objQuery["url"], c.MustGet("UID").(string))
+		shortened, err = e.s.CreatorShortened(ctx, objQuery["url"])
 		if err != nil {
 			status = http.StatusConflict
 		}
@@ -110,26 +110,26 @@ func (e *Endpoint) JSONCreateShortened(c *gin.Context) {
 		return
 	}
 
-	c.Data(status, "application/json", answer)
+	ctx.Data(status, "application/json", answer)
 }
 
 func (e *Endpoint) Ping(ctx *gin.Context) {
-	_, err := e.S.Ping(ctx)
+	_, err := e.s.Ping(ctx)
 	if err != nil {
-		c.Data(http.StatusInternalServerError, "", nil)
+		ctx.Data(http.StatusInternalServerError, "", nil)
 	}
 	ctx.Data(http.StatusOK, "", nil)
 }
 
-func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
+func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	objQuery := make([]map[string]string, 0)
-	requestBody, _ := c.GetRawData()
+	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
 		fmt.Println("err - ", err)
 		return
 	}
-	answer := e.S.CreatorShortenedBatch(objQuery, c.MustGet("UID").(string))
+	answer := e.s.CreatorShortenedBatch(ctx, objQuery)
 	for i, v := range objQuery {
 		delete(v, "original_url")
 		v["short_url"] = config.Cnf.BaseURL + strings.Fields(answer[i])[0]
@@ -139,5 +139,5 @@ func (e *Endpoint) CreateShortenedBatch(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	c.Data(http.StatusCreated, "application/json", []byte(answer1))
+	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
 }

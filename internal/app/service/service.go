@@ -10,11 +10,11 @@ import (
 )
 
 type Repository interface {
-	Store(ctx *gin.Context, short, originsl string) error
+	Store(ctx *gin.Context, short, originsl string) (string, error)
 	Find(ctx *gin.Context, short string) (string, error)
 	FindByUID(ctx *gin.Context) ([]string, error)
-	StoreBatch(string, []map[string]string) error
-	Ping(dsn string) (string, error)
+	StoreBatch(*gin.Context, []map[string]string) error
+	Ping(*gin.Context) (string, error)
 }
 
 type Service struct {
@@ -36,16 +36,29 @@ func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string
 		return "error in CreatorShortened()", err
 	}
 	short := hex.EncodeToString(b)
-	err = s.r.Store(ctx, short, originalURL)
+	shorterr, err := s.r.Store(ctx, short, originalURL)
 	if err != nil {
-		return "", err
+		return shorterr, err
 	}
 	return short, nil
 }
 
-func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) []string {
+
+func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, error) {
+	answer, err := s.r.Find(ctx, shortened)
+	return answer, err
+}
+
+func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
+	answer, err := s.r.FindByUID(ctx)
+
+	return answer, err
+}
+
+func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]string) []string {
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
+	uid := ctx.MustGet("UID").(string)
 
 	for _, v := range batch {
 		mp := make(map[string]string, 0)
@@ -60,26 +73,16 @@ func (s *Service) CreatorShortenedBatch(batch []map[string]string, uid string) [
 		mp["uid"] = uid
 		toDB = append(toDB, mp)
 	}
-	err := s.r.BulkInsert(s.c.DatabaseDsn, toDB)
+	err := s.r.StoreBatch(ctx, toDB)
 	if err != nil {
 		fmt.Println("err from service - ", err)
 	}
 	return answer
 }
 
-func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, error) {
-	answer, err := s.r.Find(ctx, shortened)
-	return answer, err
-}
 
-func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
-	answer, err := s.r.FindByUID(ctx)
-
-	return answer, err
-}
-
-func (s *Service) Ping() (string, error) {
-	answer, err := s.r.Ping(s.c.DatabaseDsn)
+func (s *Service) Ping(ctx *gin.Context) (string, error) {
+	answer, err := s.r.Ping(ctx)
 
 	return answer, err
 }
