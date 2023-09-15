@@ -84,6 +84,6 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 
 func (s *Service) Ping(ctx *gin.Context) (string, error) {
 	answer, err := s.r.Ping(ctx)
-
+	fmt.Println("s answer - ", answer)
 	return answer, err
 }

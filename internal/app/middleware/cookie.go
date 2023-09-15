@@ -36,7 +36,6 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 		}
 		cookie.Name = "UID"
 		uid, err := WriteSigned()
-		fmt.Println("Get cookie - ", cookie.Name, "+",cookie.Value)
 		if err != nil {
 			fmt.Println("error from WriteSigned - ", err)
 		}

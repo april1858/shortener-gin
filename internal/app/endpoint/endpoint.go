@@ -35,7 +35,6 @@ func New(s Service) *Endpoint {
 }
 
 func (e *Endpoint) CreateShortened(ctx *gin.Context) {
-	fmt.Println("ctx e - ",ctx)
 	contentType := "text/plain"
 	var status int = http.StatusCreated
 	originalURL, _ := ctx.GetRawData()
@@ -115,6 +114,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 }
 
 func (e *Endpoint) Ping(ctx *gin.Context) {
+	fmt.Println("e")
 	_, err := e.s.Ping(ctx)
 	if err != nil {
 		ctx.Data(http.StatusInternalServerError, "", nil)

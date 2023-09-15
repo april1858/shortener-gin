@@ -35,6 +35,7 @@ func New() *Repository {
 		if err != nil {
 			log.Fatal("Not create table - ", err)
 		}
+		fmt.Println("new repo")
 		return &Repository{
 			connPGS: db,
 		}
@@ -44,15 +45,16 @@ func New() *Repository {
 }
 
 func (r *Repository) Ping(ctx *gin.Context) (string, error) {
+	fmt.Println("config.Cnf.DatabaseDsn - ", config.Cnf.DatabaseDsn)
 	message, err := r.PGSPing(ctx, config.Cnf.DatabaseDsn)
 	if err != nil {
 		return "", err
 	}
+	
 	return message, nil
 }
 
 func (r *Repository) Store(ctx *gin.Context, short, original string) (string, error) {
-	fmt.Println("memory - ", memory)
 	var err error
 	uid := ctx.MustGet("UID").(string)
 	switch {
@@ -76,7 +78,6 @@ func (r *Repository) Store(ctx *gin.Context, short, original string) (string, er
 }
 
 func (r *Repository) Find(ctx *gin.Context, short string) (string, error) {
-	fmt.Println("memory - ", memory)
 	var answer string
 	var err error
 	switch {
