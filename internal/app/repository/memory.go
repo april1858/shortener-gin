@@ -52,7 +52,7 @@ func (r *Repository) Ping(ctx *gin.Context) (string, error) {
 }
 
 func (r *Repository) Store(ctx *gin.Context, short, original string) (string, error) {
-	fmt.Println("ctx r - ",ctx)
+	fmt.Println("memory - ", memory)
 	var err error
 	uid := ctx.MustGet("UID").(string)
 	switch {
@@ -76,6 +76,7 @@ func (r *Repository) Store(ctx *gin.Context, short, original string) (string, er
 }
 
 func (r *Repository) Find(ctx *gin.Context, short string) (string, error) {
+	fmt.Println("memory - ", memory)
 	var answer string
 	var err error
 	switch {
