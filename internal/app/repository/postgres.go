@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"context"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -11,8 +12,9 @@ import (
 
 //_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 
-func (r *Repository) PGSPing(ctx *gin.Context, dsn string) (string, error) {
-	conn, err := pgx.Connect(ctx, dsn)
+func (r *Repository) Ping() (string, error) {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, r.cnf)
 	if err != nil {
 		return "", err
 	}
@@ -24,6 +26,7 @@ func (r *Repository) PGSPing(ctx *gin.Context, dsn string) (string, error) {
 	} else {
 		fmt.Println("Yes, connecting!")
 	}
+	fmt.Println("Yes, co")
 	return "Conn", nil
 }
 

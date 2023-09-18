@@ -17,13 +17,15 @@ var memory = make([]string, 0, 1)
 type Repository struct {
 	mx      sync.RWMutex
 	connPGS *pgxpool.Pool
+	cnf string
 }
 
-func New() *Repository {
-	if config.Cnf.DatabaseDsn != "" {
-		var ctx *gin.Context
+func New(cnf config.Config) *Repository {
+	if cnf.DatabaseDsn != "" {
+		ctx := new(gin.Context)
 		var db *pgxpool.Pool
-		poolConfig, err := pgxpool.ParseConfig(config.Cnf.DatabaseDsn)
+		poolConfig, err := pgxpool.ParseConfig(cnf.DatabaseDsn)
+		fmt.Println("from new() - ", cnf.DatabaseDsn)
 		if err != nil {
 			log.Fatalln("Unable to parse DATABASE_DSN:", err)
 		}
@@ -31,27 +33,17 @@ func New() *Repository {
 		if err != nil {
 			log.Fatalln("Unable to create connection pool:", err)
 		}
-		_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
+		fmt.Println("from new()")
+		_, err = db.Exec(ctx, `create table if not exists shortener1 ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 		if err != nil {
 			log.Fatal("Not create table - ", err)
 		}
-		fmt.Println("new repo")
 		return &Repository{
 			connPGS: db,
+			cnf: cnf.DatabaseDsn,
 		}
 	}
-
 	return &Repository{}
-}
-
-func (r *Repository) Ping(ctx *gin.Context) (string, error) {
-	fmt.Println("config.Cnf.DatabaseDsn - ", config.Cnf.DatabaseDsn)
-	message, err := r.PGSPing(ctx, config.Cnf.DatabaseDsn)
-	if err != nil {
-		return "", err
-	}
-	
-	return message, nil
 }
 
 func (r *Repository) Store(ctx *gin.Context, short, original string) (string, error) {

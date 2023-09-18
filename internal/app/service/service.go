@@ -14,7 +14,7 @@ type Repository interface {
 	Find(ctx *gin.Context, short string) (string, error)
 	FindByUID(ctx *gin.Context) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
-	Ping(*gin.Context) (string, error)
+	Ping() (string, error)
 }
 
 type Service struct {
@@ -82,8 +82,8 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 }
 
 
-func (s *Service) Ping(ctx *gin.Context) (string, error) {
-	answer, err := s.r.Ping(ctx)
+func (s *Service) Ping() (string, error) {
+	answer, err := s.r.Ping()
 	fmt.Println("s answer - ", answer)
 	return answer, err
 }

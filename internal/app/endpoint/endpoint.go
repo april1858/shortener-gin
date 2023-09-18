@@ -20,7 +20,7 @@ type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context) ([]string, error)
-	Ping(*gin.Context) (string, error)
+	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) []string
 }
 
@@ -115,7 +115,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 
 func (e *Endpoint) Ping(ctx *gin.Context) {
 	fmt.Println("e")
-	_, err := e.s.Ping(ctx)
+	_, err := e.s.Ping()
 	if err != nil {
 		ctx.Data(http.StatusInternalServerError, "", nil)
 	}
