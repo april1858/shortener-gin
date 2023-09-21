@@ -25,7 +25,6 @@ func New(cnf config.Config) *Repository {
 		ctx := new(gin.Context)
 		var db *pgxpool.Pool
 		poolConfig, err := pgxpool.ParseConfig(cnf.DatabaseDsn)
-		fmt.Println("from new() - ", cnf.DatabaseDsn)
 		if err != nil {
 			log.Fatalln("Unable to parse DATABASE_DSN:", err)
 		}
@@ -33,8 +32,7 @@ func New(cnf config.Config) *Repository {
 		if err != nil {
 			log.Fatalln("Unable to create connection pool:", err)
 		}
-		fmt.Println("from new()")
-		_, err = db.Exec(ctx, `create table if not exists shortener1 ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
+		_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 		if err != nil {
 			log.Fatal("Not create table - ", err)
 		}
@@ -87,6 +85,7 @@ func (r *Repository) FindByUID(ctx *gin.Context) ([]string, error) {
 	var answer []string
 	var err error
 	uid := ctx.MustGet("UID").(string)
+	fmt.Println("memory uid - ", uid)
 	switch {
 	case config.Cnf.FileStoragePath != "":
 		answer, err = r.FileFindByUID(config.Cnf.FileStoragePath, uid)

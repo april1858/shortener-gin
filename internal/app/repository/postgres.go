@@ -26,7 +26,6 @@ func (r *Repository) Ping() (string, error) {
 	} else {
 		fmt.Println("Yes, connecting!")
 	}
-	fmt.Println("Yes, co")
 	return "Conn", nil
 }
 
@@ -54,7 +53,7 @@ func (r *Repository) PGSStore(ctx *gin.Context, short, original, uid string) (st
 func (r *Repository) PGSFind(ctx *gin.Context, short string) (string, error) {
 	var answer string
 	db := r.connPGS
-	row := db.QueryRow(ctx, `select original_url from "shortener" where short_url=$1`, short)
+	row := db.QueryRow(ctx, `select original_url from shortener where short_url=$1`, short)
 	err := row.Scan(&answer)
 	if err != nil {
 		return "", err
@@ -63,13 +62,23 @@ func (r *Repository) PGSFind(ctx *gin.Context, short string) (string, error) {
 }
 
 func (r *Repository) PGSFindByUID(ctx *gin.Context, uid string) ([]string, error) {
-	var answer []string
+	answer := make([]string, 0, 1)
 	db := r.connPGS
-	row := db.QueryRow(ctx, `select original_url from "shortener" where uid=uid`)
-	err := row.Scan(&answer)
+	rows, err := db.Query(ctx, `select short_url, original_url from shortener where uid=$1`, uid)
 	if err != nil {
+		fmt.Println("err from PGSUID - ", err)
+	}
+	for rows.Next() {
+		var a1 string
+		var a2 string
+		err = rows.Scan(&a1, &a2)
+		answer = append(answer, a1 +" "+ a2)
+	}
+	if err != nil {
+		fmt.Println("!err - ", err)
 		return nil, err
 	}
+	fmt.Println("answer - ", answer)
 	return answer, nil
 }
 

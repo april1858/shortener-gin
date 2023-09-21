@@ -114,7 +114,6 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 }
 
 func (e *Endpoint) Ping(ctx *gin.Context) {
-	fmt.Println("e")
 	_, err := e.s.Ping()
 	if err != nil {
 		ctx.Data(http.StatusInternalServerError, "", nil)

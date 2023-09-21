@@ -27,10 +27,6 @@ func New() (*App, error) {
 
 	a.repo = repository.New(*a.config)
 
-	fmt.Println("a.repo - ", a.repo)
-
-	//fmt.Println("from app r.mx - ", a.repo.mx, "r.connPGS - ", a.repo.connPGS, "r.cnf - ", a.repo.cnf)
-
 	a.s = service.New(a.repo)
 
 	a.e = endpoint.New(a.s)
