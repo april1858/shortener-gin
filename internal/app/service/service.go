@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"log"
 
 	//"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
@@ -60,8 +59,6 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
 	uid := ctx.MustGet("UID").(string)
-	log.Println("log uid - ", uid)
-	fmt.Println("uid - ", uid)
 	for _, v := range batch {
 		mp := make(map[string]string, 0)
 		b := make([]byte, 4)

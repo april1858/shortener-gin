@@ -81,8 +81,8 @@ func (r *Repository) PGSFindByUID(ctx *gin.Context, uid string) ([]string, error
 	fmt.Println("answer - ", answer)
 	return answer, nil
 }
-
-func (r *Repository) PGSStoreBatch(ctx *gin.Context, batch []map[string]string) error {
+/*
+func (r *Repository) PGSStoreBatch1(ctx *gin.Context, batch []map[string]string) error {
 	db := r.connPGS
 	_, err := db.Exec(ctx, `INSERT INTO shortener (uid, short_url, original_url) VALUES ($1, $2, $3)`, batch)
 	if err != nil {
@@ -90,8 +90,8 @@ func (r *Repository) PGSStoreBatch(ctx *gin.Context, batch []map[string]string) 
 	}
 	return nil
 }
-
-func (r *Repository) BulkInsert(ctx *gin.Context, bulks []map[string]string) error {
+*/
+func (r *Repository) PGSStoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	db := r.connPGS
 	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
 	batch := &pgx.Batch{}
