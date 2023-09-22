@@ -12,12 +12,12 @@ import (
 )
 
 type App struct {
-	e      *endpoint.Endpoint
-	repo   *repository.Repository
-	s      *service.Service
-	route  *gin.Engine
-	config *config.Config
-	mw     *middleware.MW
+	endpoint *endpoint.Endpoint
+	repo     *repository.Repository
+	service  *service.Service
+	route    *gin.Engine
+	config   *config.Config
+	mw       *middleware.MW
 }
 
 func New() (*App, error) {
@@ -27,9 +27,9 @@ func New() (*App, error) {
 
 	a.repo = repository.New(*a.config)
 
-	a.s = service.New(a.repo)
+	a.service = service.New(a.repo)
 
-	a.e = endpoint.New(a.s)
+	a.endpoint = endpoint.New(a.service)
 
 	a.mw = middleware.New()
 
@@ -37,12 +37,12 @@ func New() (*App, error) {
 	a.route = gin.Default()
 
 	a.route.Use(a.mw.Cookie(), a.mw.GZIP())
-	a.route.POST("/", a.e.CreateShortened)
-	a.route.POST("/api/shorten", a.e.JSONCreateShortened)
-	a.route.POST("/api/shorten/batch", a.e.CreateShortenedBatch)
-	a.route.GET("/:id", a.e.GetOriginalURL)
-	a.route.GET("/api/user/urls", a.e.GetAllUID)
-	a.route.GET("/ping", a.e.Ping)
+	a.route.POST("/", a.endpoint.CreateShortened)
+	a.route.POST("/api/shorten", a.endpoint.JSONCreateShortened)
+	a.route.POST("/api/shorten/batch", a.endpoint.CreateShortenedBatch)
+	a.route.GET("/:id", a.endpoint.GetOriginalURL)
+	a.route.GET("/api/user/urls", a.endpoint.GetAllUID)
+	a.route.GET("/ping", a.endpoint.Ping)
 
 	return a, nil
 }

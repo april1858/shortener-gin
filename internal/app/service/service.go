@@ -3,9 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 
-	//"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,13 +17,11 @@ type Repository interface {
 
 type Service struct {
 	r Repository
-	//c config.Config
 }
 
 func New(r Repository) *Service {
 	return &Service{
 		r: r,
-		//c: c,
 	}
 }
 
@@ -33,16 +29,15 @@ func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
-		return "error in CreatorShortened()", err
+		return "error from CreatorShortened()", err
 	}
 	short := hex.EncodeToString(b)
-	shorterr, err := s.r.Store(ctx, short, originalURL)
+	shorter, err := s.r.Store(ctx, short, originalURL)
 	if err != nil {
-		return shorterr, err
+		return shorter, err
 	}
 	return short, nil
 }
-
 
 func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, error) {
 	answer, err := s.r.Find(ctx, shortened)
@@ -55,7 +50,7 @@ func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
 	return answer, err
 }
 
-func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]string) []string {
+func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]string) ([]string, error) {
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
 	uid := ctx.MustGet("UID").(string)
@@ -64,7 +59,7 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 		b := make([]byte, 4)
 		_, err := rand.Read(b)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+uid)
 		mp["short_url"] = hex.EncodeToString(b)
@@ -74,11 +69,10 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 	}
 	err := s.r.StoreBatch(ctx, toDB)
 	if err != nil {
-		fmt.Println("err from service - ", err)
+		return nil, err
 	}
-	return answer
+	return answer, nil
 }
-
 
 func (s *Service) Ping() (string, error) {
 	answer, err := s.r.Ping()

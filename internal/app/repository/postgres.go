@@ -1,16 +1,14 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"context"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
-
-//_, err = db.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 
 func (r *Repository) Ping() (string, error) {
 	ctx := context.Background()
@@ -48,8 +46,6 @@ func (r *Repository) PGSStore(ctx *gin.Context, short, original, uid string) (st
 	return "", nil
 }
 
-
-
 func (r *Repository) PGSFind(ctx *gin.Context, short string) (string, error) {
 	var answer string
 	db := r.connPGS
@@ -66,31 +62,20 @@ func (r *Repository) PGSFindByUID(ctx *gin.Context, uid string) ([]string, error
 	db := r.connPGS
 	rows, err := db.Query(ctx, `select short_url, original_url from shortener where uid=$1`, uid)
 	if err != nil {
-		fmt.Println("err from PGSUID - ", err)
+		return nil, err
 	}
 	for rows.Next() {
 		var a1 string
 		var a2 string
 		err = rows.Scan(&a1, &a2)
-		answer = append(answer, a1 +" "+ a2)
+		answer = append(answer, a1+" "+a2)
 	}
 	if err != nil {
-		fmt.Println("!err - ", err)
 		return nil, err
 	}
-	fmt.Println("answer - ", answer)
 	return answer, nil
 }
-/*
-func (r *Repository) PGSStoreBatch1(ctx *gin.Context, batch []map[string]string) error {
-	db := r.connPGS
-	_, err := db.Exec(ctx, `INSERT INTO shortener (uid, short_url, original_url) VALUES ($1, $2, $3)`, batch)
-	if err != nil {
-		fmt.Println("222 - ", err)
-	}
-	return nil
-}
-*/
+
 func (r *Repository) PGSStoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	db := r.connPGS
 	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`

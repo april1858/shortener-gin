@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
@@ -85,7 +84,6 @@ func (r *Repository) FindByUID(ctx *gin.Context) ([]string, error) {
 	var answer []string
 	var err error
 	uid := ctx.MustGet("UID").(string)
-	fmt.Println("memory uid - ", uid)
 	switch {
 	case config.Cnf.FileStoragePath != "":
 		answer, err = r.FileFindByUID(config.Cnf.FileStoragePath, uid)

@@ -21,7 +21,7 @@ type Service interface {
 	FindOriginalURL(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
-	CreatorShortenedBatch(*gin.Context, []map[string]string) []string
+	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
 }
 
 type Endpoint struct {
@@ -126,10 +126,12 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
-		fmt.Println("err - ", err)
-		return
+		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
-	answer := e.s.CreatorShortenedBatch(ctx, objQuery)
+	answer, err := e.s.CreatorShortenedBatch(ctx, objQuery)
+	if err != nil {
+		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
+	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
 		v["short_url"] = config.Cnf.BaseURL + strings.Fields(answer[i])[0]
@@ -137,7 +139,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	answer1, err := json.Marshal(objQuery)
 
 	if err != nil {
-		return
+		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
 }
