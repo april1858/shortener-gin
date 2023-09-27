@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,14 +16,10 @@ var (
 	ErrValueTooLong = errors.New("cookie value too long")
 	ErrInvalidValue = errors.New("invalid cookie value")
 	secretKey       = []byte("12345")
-	cookie          http.Cookie
 )
 
 func (mw *MW) Cookie() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mw.mx.Lock()
-		defer mw.mx.Unlock()
-		// Get cookie
 		if signedValue, err := c.Cookie("UID"); err == nil {
 			value, err := ReadSigned(signedValue)
 			if err != nil {
@@ -34,12 +29,12 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		cookie.Name = "UID"
-		uid, err := WriteSigned()
+		name := "UID"
+		uid, signedValue, err := WriteSigned(name)
 		if err != nil {
 			fmt.Println("error from WriteSigned - ", err)
 		}
-		c.SetCookie(cookie.Name, cookie.Value, 3600, "/", "", false, false)
+		c.SetCookie(name, signedValue, 3600, "/", "", false, false)
 		c.Set("UID", uid)
 		c.Next()
 	}
@@ -74,22 +69,22 @@ func ReadSigned(sValue string) (string, error) {
 	return string(value), nil
 }
 
-func WriteSigned() (string, error) {
+func WriteSigned(name string) (string, string, error) {
 	uid := createCode()
-	cookie.Value = uid
+	value := uid
 	mac := hmac.New(sha256.New, secretKey)
-	_, err := mac.Write([]byte(cookie.Name))
+	_, err := mac.Write([]byte(name))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	_, err = mac.Write([]byte(cookie.Value))
+	_, err = mac.Write([]byte(value))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	signature := mac.Sum(nil)
-	cookie.Value = string(signature) + cookie.Value
-	cookie.Value = base64.URLEncoding.EncodeToString([]byte(cookie.Value))
-	return uid, nil
+	value = string(signature) + value
+	value = base64.URLEncoding.EncodeToString([]byte(value))
+	return uid, value, nil
 }
 
 func createCode() string {

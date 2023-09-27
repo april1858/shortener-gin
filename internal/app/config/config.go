@@ -52,18 +52,12 @@ func New() *Config {
 
 	if d == "" {
 		db = *D
-		if *D == "" {
-			db = ""
-		}
 	} else {
 		db = d
 	}
 
 	if f == "" {
 		file = *F
-		if *F == "" {
-			file = ""
-		}
 	} else {
 		file = f
 	}

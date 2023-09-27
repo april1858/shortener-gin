@@ -1,14 +1,11 @@
 package middleware
 
 import (
-	"sync"
-
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
 type MW struct {
-	mx sync.RWMutex
 }
 
 func New() *MW {

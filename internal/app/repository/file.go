@@ -5,33 +5,44 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
-func (r *Repository) FileStore(filename, short, original, uid string) error {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-	_, err := os.Stat(filename)
+type File struct {
+	mx       sync.RWMutex
+	filename string
+}
+
+func NewFileStorage(f string) *File {
+	return &File{filename: f}
+}
+
+func (f *File) Store(short, original, uid string) error {
+	data := make([]string, 0, 1)
+	f.mx.Lock()
+	defer f.mx.Unlock()
+	_, err := os.Stat(f.filename)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.OpenFile(filename, os.O_CREATE, 0777)
+			os.OpenFile(f.filename, os.O_CREATE, 0777)
 		}
-		memory = append(memory, short+" "+original)
+		data = append(data, short+" "+original+" "+uid)
 	} else {
-		content, err := os.ReadFile(filename)
+		content, err := os.ReadFile(f.filename)
 		if err != nil {
 			log.Println("error - ", err)
 			return err
 		}
-		json.Unmarshal(content, &memory)
-		memory = append(memory, short+" "+original+" "+uid)
+		json.Unmarshal(content, &data)
+		data = append(data, short+" "+original+" "+uid)
 	}
 
-	data, err := json.Marshal(memory)
+	out, err := json.Marshal(data)
 	if err != nil {
 		log.Println("error ", err)
 		return err
 	}
-	err = os.WriteFile(filename, data, 0777)
+	err = os.WriteFile(f.filename, out, 0644)
 	if err != nil {
 		log.Println("error ", err)
 		return err
@@ -39,10 +50,10 @@ func (r *Repository) FileStore(filename, short, original, uid string) error {
 	return nil
 }
 
-func (r *Repository) FileFind(filename, short string) (string, error) {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-	fileData, err := os.ReadFile(filename)
+func (f *File) Find(short string) (string, error) {
+	f.mx.Lock()
+	defer f.mx.Unlock()
+	fileData, err := os.ReadFile(f.filename)
 	if err != nil {
 		log.Println("error ", err)
 		return "", err
@@ -59,10 +70,10 @@ func (r *Repository) FileFind(filename, short string) (string, error) {
 	return "", nil
 }
 
-func (r *Repository) FileFindByUID(filename, uid string) ([]string, error) {
-	r.mx.Lock()
-	defer r.mx.Unlock()
-	fileData, err := os.ReadFile(filename)
+func (f *File) FindByUID(uid string) ([]string, error) {
+	f.mx.Lock()
+	defer f.mx.Unlock()
+	fileData, err := os.ReadFile(f.filename)
 	if err != nil {
 		log.Println("error ", err)
 		return nil, err

@@ -13,7 +13,7 @@ import (
 
 type App struct {
 	endpoint *endpoint.Endpoint
-	repo     *repository.Repository
+	repo     *repository
 	service  *service.Service
 	route    *gin.Engine
 	config   *config.Config
@@ -21,11 +21,20 @@ type App struct {
 }
 
 func New() (*App, error) {
+	var err error
+	fmt.Println("err - ", err)
 	a := &App{}
 
 	a.config = config.New()
 
-	a.repo = repository.New(*a.config)
+	switch {
+	case a.config.DatabaseDsn != "":
+		a.repo = repository.NewDBStorage(a.config.DatabaseDsn)
+	case a.config.FileStoragePath != "":
+		a.repo = repository.NewFileStorage(a.config.FileStoragePath)
+	default:
+		a.repo = repository.NewMemStorage()
+	}
 
 	a.service = service.New(a.repo)
 
