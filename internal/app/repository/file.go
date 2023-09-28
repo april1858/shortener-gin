@@ -93,7 +93,7 @@ func (f *File) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 }
 
 func (f *File) Ping() (string, error) {
-	return "Yes! Ping from File", nil
+	return "Yes! Ping from File\n", nil
 }
 
 func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {

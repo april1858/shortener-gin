@@ -53,6 +53,9 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
+	if answer == "" {
+		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Not found"))
+	}
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))
@@ -114,11 +117,11 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 }
 
 func (e *Endpoint) Ping(ctx *gin.Context) {
-	_, err := e.s.Ping()
+	message, err := e.s.Ping()
 	if err != nil {
 		ctx.Data(http.StatusInternalServerError, "", nil)
 	}
-	ctx.Data(http.StatusOK, "", nil)
+	ctx.Data(http.StatusOK, "", []byte(message))
 }
 
 func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {

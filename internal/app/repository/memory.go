@@ -53,7 +53,7 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 }
 
 func (r *Memory) Ping() (string, error) {
-	return "Yes! Ping from Memory", nil
+	return "Yes! Ping from Memory\n", nil
 }
 
 func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {

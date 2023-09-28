@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -17,25 +16,25 @@ type DB struct {
 	db      string
 }
 
-func NewDBStorage(db string) *DB {
+func NewDBStorage(db string) (*DB, error) {
 	ctx := new(gin.Context)
 	var conn *pgxpool.Pool
 	poolConfig, err := pgxpool.ParseConfig(db)
 	if err != nil {
-		log.Fatalln("Unable to parse DATABASE_DSN:", err)
+		return nil, err
 	}
 	conn, err = pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
-		log.Fatalln("Unable to create connection pool:", err)
+		return nil, err
 	}
 	_, err = conn.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
 	if err != nil {
-		log.Fatal("Not create table - ", err)
+		return nil, err
 	}
 	return &DB{
 		connPGS: conn,
 		db:      db,
-	}
+	}, nil
 }
 
 func (d *DB) Ping() (string, error) {
@@ -65,7 +64,7 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 				row := db.QueryRow(ctx, `select short_url from "shortener" where original_url=$1`, original)
 				err := row.Scan(&answer)
 				if err != nil {
-					panic(err)
+					return "", err
 				}
 				return answer, pgxError
 			}
@@ -117,6 +116,5 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 		batch.Queue(query, args)
 	}
 	results := db.SendBatch(ctx, batch)
-	defer results.Close()
-	return nil
+	return results.Close()
 }

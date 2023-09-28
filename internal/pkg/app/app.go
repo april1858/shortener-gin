@@ -24,14 +24,16 @@ type App struct {
 
 func New() (*App, error) {
 	var err error
-	fmt.Println("err - ", err)
 	a := &App{}
 
 	a.config = config.New()
 
 	switch {
 	case a.config.DatabaseDsn != "":
-		a.repoDB = repository.NewDBStorage(a.config.DatabaseDsn)
+		a.repoDB, err = repository.NewDBStorage(a.config.DatabaseDsn)
+		if err != nil {
+			return nil, err
+		}
 		a.service = service.New(a.repoDB)
 	case a.config.FileStoragePath != "":
 		a.repoFile = repository.NewFileStorage(a.config.FileStoragePath)
