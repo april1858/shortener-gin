@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 type File struct {
@@ -17,7 +19,7 @@ func NewFileStorage(f string) *File {
 	return &File{filename: f}
 }
 
-func (f *File) Store(short, original, uid string) error {
+func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error) {
 	data := make([]string, 0, 1)
 	f.mx.Lock()
 	defer f.mx.Unlock()
@@ -31,7 +33,7 @@ func (f *File) Store(short, original, uid string) error {
 		content, err := os.ReadFile(f.filename)
 		if err != nil {
 			log.Println("error - ", err)
-			return err
+			return "", err
 		}
 		json.Unmarshal(content, &data)
 		data = append(data, short+" "+original+" "+uid)
@@ -40,17 +42,17 @@ func (f *File) Store(short, original, uid string) error {
 	out, err := json.Marshal(data)
 	if err != nil {
 		log.Println("error ", err)
-		return err
+		return "", err
 	}
 	err = os.WriteFile(f.filename, out, 0644)
 	if err != nil {
 		log.Println("error ", err)
-		return err
+		return "", err
 	}
-	return nil
+	return "", nil
 }
 
-func (f *File) Find(short string) (string, error) {
+func (f *File) Find(_ *gin.Context, short string) (string, error) {
 	f.mx.Lock()
 	defer f.mx.Unlock()
 	fileData, err := os.ReadFile(f.filename)
@@ -70,7 +72,7 @@ func (f *File) Find(short string) (string, error) {
 	return "", nil
 }
 
-func (f *File) FindByUID(uid string) ([]string, error) {
+func (f *File) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	f.mx.Lock()
 	defer f.mx.Unlock()
 	fileData, err := os.ReadFile(f.filename)
@@ -88,4 +90,12 @@ func (f *File) FindByUID(uid string) ([]string, error) {
 		}
 	}
 	return answer, nil
+}
+
+func (f *File) Ping() (string, error) {
+	return "Yes! Ping from File", nil
+}
+
+func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
+	return nil
 }

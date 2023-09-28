@@ -12,12 +12,14 @@ import (
 )
 
 type App struct {
-	endpoint *endpoint.Endpoint
-	repo     *repository
-	service  *service.Service
-	route    *gin.Engine
-	config   *config.Config
-	mw       *middleware.MW
+	endpoint   *endpoint.Endpoint
+	repoDB     *repository.DB
+	repoFile   *repository.File
+	repoMemory *repository.Memory
+	service    *service.Service
+	route      *gin.Engine
+	config     *config.Config
+	mw         *middleware.MW
 }
 
 func New() (*App, error) {
@@ -29,14 +31,15 @@ func New() (*App, error) {
 
 	switch {
 	case a.config.DatabaseDsn != "":
-		a.repo = repository.NewDBStorage(a.config.DatabaseDsn)
+		a.repoDB = repository.NewDBStorage(a.config.DatabaseDsn)
+		a.service = service.New(a.repoDB)
 	case a.config.FileStoragePath != "":
-		a.repo = repository.NewFileStorage(a.config.FileStoragePath)
+		a.repoFile = repository.NewFileStorage(a.config.FileStoragePath)
+		a.service = service.New(a.repoFile)
 	default:
-		a.repo = repository.NewMemStorage()
+		a.repoMemory = repository.NewMemStorage()
+		a.service = service.New(a.repoMemory)
 	}
-
-	a.service = service.New(a.repo)
 
 	a.endpoint = endpoint.New(a.service)
 

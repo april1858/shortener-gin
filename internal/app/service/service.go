@@ -8,9 +8,9 @@ import (
 )
 
 type Repository interface {
-	Store(ctx *gin.Context, short, originsl string) (string, error)
+	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
 	Find(ctx *gin.Context, short string) (string, error)
-	FindByUID(ctx *gin.Context) ([]string, error)
+	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
 }
@@ -26,13 +26,14 @@ func New(r Repository) *Service {
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
+	uid := ctx.MustGet("UID").(string)
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
 		return "error from CreatorShortened()", err
 	}
 	short := hex.EncodeToString(b)
-	shorter, err := s.r.Store(ctx, short, originalURL)
+	shorter, err := s.r.Store(ctx, short, originalURL, uid)
 	if err != nil {
 		return shorter, err
 	}
@@ -45,7 +46,8 @@ func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, e
 }
 
 func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
-	answer, err := s.r.FindByUID(ctx)
+	uid := ctx.MustGet("UID").(string)
+	answer, err := s.r.FindByUID(ctx, uid)
 
 	return answer, err
 }
