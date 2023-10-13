@@ -6,20 +6,19 @@ import (
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
 	"github.com/april1858/shortener-gin/internal/app/middleware"
-	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
 	"github.com/gin-gonic/gin"
 )
 
 type App struct {
-	endpoint   *endpoint.Endpoint
-	repoDB     *repository.DB
-	repoFile   *repository.File
-	repoMemory *repository.Memory
-	service    *service.Service
-	route      *gin.Engine
-	config     *config.Config
-	mw         *middleware.MW
+	endpoint *endpoint.Endpoint
+	//repoDB     *repository.DB
+	//repoFile   *repository.File
+	//repoMemory *repository.Memory
+	service *service.Service
+	route   *gin.Engine
+	config  *config.Config
+	mw      *middleware.MW
 }
 
 func New() (*App, error) {
