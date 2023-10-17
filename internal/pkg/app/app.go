@@ -22,26 +22,15 @@ type App struct {
 }
 
 func New() (*App, error) {
-	//var err error
+	var err error
 	a := &App{}
 
 	a.config = config.New()
-	/*
-		switch {
-		case a.config.DatabaseDsn != "":
-			a.repoDB, err = repository.NewDBStorage(a.config.DatabaseDsn)
-			if err != nil {
-				return nil, err
-			}
-			a.service = service.New(a.repoDB)
-		case a.config.FileStoragePath != "":
-			a.repoFile = repository.NewFileStorage(a.config.FileStoragePath)
-			a.service = service.New(a.repoFile)
-		default:
-			a.repoMemory = repository.NewMemStorage()
-			a.service = service.New(a.repoMemory)
-		}
-	*/
+
+	a.service, err = service.New(a.config)
+	if err != nil {
+
+	}
 	a.endpoint = endpoint.New(a.service)
 
 	a.mw = middleware.New()

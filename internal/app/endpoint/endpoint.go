@@ -46,7 +46,7 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 		if err != nil {
 			status = http.StatusConflict
 		}
-		ctx.Data(status, contentType, []byte(config.Cnf.BaseURL+shortened))
+		ctx.Data(status, contentType, []byte(config.BURL+shortened))
 	}
 }
 
@@ -74,7 +74,7 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 		var r Redirect
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
-			r.ShortURL = config.Cnf.BaseURL + v[0]
+			r.ShortURL = config.BURL + v[0]
 			r.OriginalURL = v[1]
 			redirect = append(redirect, r)
 		}
@@ -107,7 +107,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 		}
 	}
 
-	answerStruct := map[string]string{"result": config.Cnf.BaseURL + shortened}
+	answerStruct := map[string]string{"result": config.BURL + shortened}
 	answer, err := json.Marshal(answerStruct)
 	if err != nil {
 		return
@@ -137,7 +137,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
-		v["short_url"] = config.Cnf.BaseURL + strings.Fields(answer[i])[0]
+		v["short_url"] = config.BURL + strings.Fields(answer[i])[0]
 	}
 	answer1, err := json.Marshal(objQuery)
 
