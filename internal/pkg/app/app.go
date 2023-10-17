@@ -29,7 +29,7 @@ func New() (*App, error) {
 
 	a.service, err = service.New(a.config)
 	if err != nil {
-
+		fmt.Println("DB error!")
 	}
 	a.endpoint = endpoint.New(a.service)
 
