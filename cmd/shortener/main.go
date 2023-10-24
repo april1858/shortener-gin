@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"github.com/april1858/shortener-gin/internal/pkg/app"
+	"log"
 )
 
 func main() {
@@ -10,7 +10,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	err = a.Run()
 	if err != nil {
 		log.Fatal(err)
