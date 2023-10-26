@@ -101,6 +101,7 @@ func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (f *File) Delete() {
+func (f *File) Delete(_ *gin.Context, _ []string) error {
 	fmt.Println("!!")
+	return nil
 }

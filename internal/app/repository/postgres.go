@@ -119,6 +119,12 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-func (d *DB) Delete() {
-	fmt.Println("!!!")
+func (d *DB) Delete(ctx *gin.Context, remove []string) error {
+	uid := ctx.MustGet("UID").(string)
+	db := d.connPGS
+	query := `UPDATE shortener6 SET condition = false WHERE uid = 'uid' AND short_url = @short_url`
+	batch := &pgx.Batch{}
+	batch.Queue(query, remove)
+	results := db.SendBatch(ctx, batch)
+	return results.Close()
 }

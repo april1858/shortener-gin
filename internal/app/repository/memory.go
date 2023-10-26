@@ -61,6 +61,7 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Delete() {
+func (r *Memory) Delete(ctx *gin.Context, remove []string) error {
 	fmt.Println("!")
+	return nil
 }
