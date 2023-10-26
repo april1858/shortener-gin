@@ -45,6 +45,7 @@ func New() (*App, error) {
 	a.route.GET("/:id", a.endpoint.GetOriginalURL)
 	a.route.GET("/api/user/urls", a.endpoint.GetAllUID)
 	a.route.GET("/ping", a.endpoint.Ping)
+	a.route.DELETE("/api/user/urls", a.endpoint.Delete)
 
 	return a, nil
 }

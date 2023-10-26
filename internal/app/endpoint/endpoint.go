@@ -22,6 +22,7 @@ type Service interface {
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
+	Delete(*gin.Context, []string) error
 }
 
 type Endpoint struct {
@@ -145,4 +146,20 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
+}
+
+func (e *Endpoint) Delete(ctx *gin.Context) {
+	remove := make([]string, 1)
+	requestBody, _ := ctx.GetRawData()
+
+	if err := json.Unmarshal(requestBody, &remove); err != nil {
+		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
+	}
+	err := e.s.Delete(ctx, remove)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, "application/json", []byte(err.Error()))
+	}
+
+	ctx.Data(http.StatusAccepted, "application/json", nil)
+
 }

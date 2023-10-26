@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 
@@ -58,4 +59,8 @@ func (r *Memory) Ping() (string, error) {
 
 func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
+}
+
+func (r *Memory) Delete() {
+	fmt.Println("!")
 }

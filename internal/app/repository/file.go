@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -98,4 +99,8 @@ func (f *File) Ping() (string, error) {
 
 func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
+}
+
+func (f *File) Delete() {
+	fmt.Println("!!")
 }
