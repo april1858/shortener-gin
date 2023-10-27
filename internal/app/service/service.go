@@ -16,7 +16,7 @@ type Repository interface {
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
-	Delete(*gin.Context, []string) error
+	Delete(*gin.Context, []string) (int64, error)
 }
 
 type Service struct {
@@ -98,7 +98,7 @@ func (s *Service) Ping() (string, error) {
 	return answer, err
 }
 
-func (s *Service) Delete(ctx *gin.Context, remove []string) error {
-	err := s.r.Delete(ctx, remove)
-	return err
+func (s *Service) Delete(ctx *gin.Context, remove []string) (int64, error) {
+	removed, err := s.r.Delete(ctx, remove)
+	return removed, err
 }
