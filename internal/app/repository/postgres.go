@@ -74,14 +74,17 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 }
 
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
-	var answer string
+	var a1 string
+	var a2 bool
 	db := d.connPGS
-	row := db.QueryRow(ctx, `select original_url from shortener6 where short_url=$1`, short)
-	err := row.Scan(&answer)
+	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
 	if err != nil {
 		return "", err
 	}
-	return answer, nil
+	if !a2 {
+		a1 = "deleted"
+	}
+	return a1, nil
 }
 
 func (d *DB) FindByUID(ctx *gin.Context, uid string) ([]string, error) {
