@@ -138,7 +138,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 		}
 	}()
 
-	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
+	_, err := db.Exec(ctx, `UPDATE shortener6 SET original_url = "" WHERE condition = false`)
 	if err != nil {
 		panic(err)
 	}
