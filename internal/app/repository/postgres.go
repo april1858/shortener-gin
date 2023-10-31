@@ -84,7 +84,7 @@ func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 		}
 	}
 	db := d.connPGS
-	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
+	err := db.QueryRow(ctx, `select original_url from shortener6 where short_url=$1`, short).Scan(&a1)
 	if err != nil {
 		return "", err
 	}
