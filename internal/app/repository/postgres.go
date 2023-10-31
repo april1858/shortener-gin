@@ -122,16 +122,19 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-func (d *DB) Delete(ctx *gin.Context, remove []string) (int64, error) {
-	uid := ctx.MustGet("UID").(string)
+func (d *DB) Delete(ctx *gin.Context, c chan S) {
+
 	db := d.connPGS
-	var removed int64
-	for _, r := range remove {
-		x, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-		removed = x.RowsAffected()
-		if err != nil {
-			return 0, err
+	go func() {
+		var s = <-c
+		data := s.Data
+		uid := s.Uid
+		for _, r := range data {
+			_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			//removed = x.RowsAffected()
+			if err != nil {
+				fmt.Println("err postgres -", err)
+			}
 		}
-	}
-	return removed, nil
+	}()
 }

@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type S struct {
+	Uid  string
+	Data []string
+}
+
 type Memory struct {
 	mx     sync.RWMutex
 	memory []string
@@ -61,7 +66,6 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Delete(ctx *gin.Context, remove []string) (int64, error) {
+func (r *Memory) Delete(ctx *gin.Context, c chan S) {
 	fmt.Println("!")
-	return 0, nil
 }

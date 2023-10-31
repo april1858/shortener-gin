@@ -3,6 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/repository"
@@ -16,7 +17,7 @@ type Repository interface {
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
-	Delete(*gin.Context, []string) (int64, error)
+	Delete(*gin.Context, chan repository.S)
 }
 
 type Service struct {
@@ -98,7 +99,7 @@ func (s *Service) Ping() (string, error) {
 	return answer, err
 }
 
-func (s *Service) Delete(ctx *gin.Context, remove []string) (int64, error) {
-	removed, err := s.r.Delete(ctx, remove)
-	return removed, err
+func (s *Service) Delete(ctx *gin.Context, c chan repository.S) {
+	fmt.Println("ccc - ", c)
+	s.r.Delete(ctx, c)
 }
