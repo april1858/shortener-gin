@@ -57,7 +57,7 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
 	if answer == "" {
-		ctx.Data(http.StatusGone, "text/plain", []byte("Not found"))
+		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Not found"))
 	}
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)

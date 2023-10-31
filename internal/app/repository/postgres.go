@@ -16,6 +16,8 @@ type DB struct {
 	db      string
 }
 
+var f []string
+
 func NewDBStorage(db string) (*DB, error) {
 	ctx := new(gin.Context)
 	var conn *pgxpool.Pool
@@ -76,6 +78,11 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	var a1 string
 	var a2 bool
+	for _, a := range f {
+		if short == a {
+			a2 = false
+		}
+	}
 	db := d.connPGS
 	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
 	if err != nil {
@@ -129,6 +136,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 	data := s.Data
 	uid := s.UID
 	for _, r := range data {
+		f = append(f, r)
 		_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
 		//removed = x.RowsAffected()
 		if err != nil {
