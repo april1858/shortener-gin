@@ -85,12 +85,11 @@ func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	}
 	db := d.connPGS
 	err := db.QueryRow(ctx, `select original_url from shortener6 where short_url=$1`, short).Scan(&a1)
-	if err != nil && a2 == true {
+	if err != nil && a2 {
 		return "", err
 	}
 	if !a2 {
 		a1 = "deleted"
-		fmt.Println(a1)
 	}
 	return a1, nil
 }
@@ -147,6 +146,6 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 
 	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
