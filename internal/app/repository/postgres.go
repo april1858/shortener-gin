@@ -90,6 +90,7 @@ func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	}
 	if !a2 {
 		a1 = "deleted"
+		fmt.Println(a1)
 	}
 	return a1, nil
 }

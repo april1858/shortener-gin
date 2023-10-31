@@ -59,13 +59,13 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	if answer == "" {
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Not found"))
 	}
+	if answer == "deleted" {
+		ctx.Data(http.StatusGone, "text/plain", []byte(answer))
+	}
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
-		if answer == "deleted" {
-			ctx.Data(http.StatusGone, "text/plain", []byte(answer))
-		}
 		ctx.Redirect(http.StatusTemporaryRedirect, answer)
 	}
 }
