@@ -164,7 +164,6 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	}
 	s := repository.S{UID: uid, Data: remove}
 	go func(cc chan repository.S) {
-		fmt.Println("! - ", s, cc)
 		cc <- s
 		//fmt.Println("s - ", cc)
 		//e.s.Delete(ctx, cc)
