@@ -10,7 +10,7 @@ import (
 )
 
 type S struct {
-	Uid  string
+	UID  string
 	Data []string
 }
 

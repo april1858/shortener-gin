@@ -162,7 +162,7 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
-	s := repository.S{Uid: uid, Data: remove}
+	s := repository.S{UID: uid, Data: remove}
 	go func(cc chan repository.S) {
 		fmt.Println("! - ", s, cc)
 		cc <- s

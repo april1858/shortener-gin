@@ -128,7 +128,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 	go func() {
 		var s = <-c
 		data := s.Data
-		uid := s.Uid
+		uid := s.UID
 		for _, r := range data {
 			_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
 			//removed = x.RowsAffected()
@@ -137,4 +137,9 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 			}
 		}
 	}()
+
+	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
+	if err != nil {
+		panic(err)
+	}
 }
