@@ -16,7 +16,7 @@ type DB struct {
 	db      string
 }
 
-var f []string
+var f = make([]string, 0, 1)
 
 func NewDBStorage(db string) (*DB, error) {
 	ctx := new(gin.Context)
