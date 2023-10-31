@@ -77,7 +77,7 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	var a1 string
-	var a2 bool
+	var a2 bool = true
 	for _, a := range f {
 		if short == a {
 			a2 = false
