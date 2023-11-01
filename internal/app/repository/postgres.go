@@ -134,6 +134,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 	db := d.connPGS
 	var s = <-c
 	data := s.Data
+	fmt.Println("data - ", data)
 	uid := s.UID
 	for _, r := range data {
 		f = append(f, r)
