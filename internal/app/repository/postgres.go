@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -132,18 +133,25 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 func (d *DB) Delete(ctx *gin.Context, c chan S) {
 
 	db := d.connPGS
-	var s = <-c
-	data := s.Data
-	fmt.Println("data - ", data)
-	uid := s.UID
-	for _, r := range data {
-		f = append(f, r)
-		_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-		//removed = x.RowsAffected()
-		if err != nil {
-			fmt.Println("err postgres -", err)
+
+	go func() {
+		wg := &sync.WaitGroup{}
+
+		var s = <-c
+		data := s.Data
+		fmt.Println("data - ", data)
+		uid := s.UID
+		for _, r := range data {
+			f = append(f, r)
+			_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			//removed = x.RowsAffected()
+			if err != nil {
+				fmt.Println("err postgres -", err)
+			}
 		}
-	}
+
+		wg.Wait()
+	}()
 
 	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
 	if err != nil {
