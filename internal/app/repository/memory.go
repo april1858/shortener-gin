@@ -66,6 +66,24 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Delete(_ *gin.Context, _ chan S) {
-	fmt.Println("!")
+func (r *Memory) Delete(_ *gin.Context, c chan S) {
+	go func() {
+		wg := &sync.WaitGroup{}
+		var s = <-c
+		data := s.Data
+		fmt.Println("data - ", data)
+		uid := s.UID
+		for _, rr := range data {
+			f = append(f, rr)
+			for i, value := range r.memory {
+				var v = strings.Fields(value)
+				if uid == v[2] && rr == v[0] {
+					copy(r.memory[i:], r.memory[i+1:])
+				}
+			}
+
+		}
+
+		wg.Wait()
+	}()
 }
