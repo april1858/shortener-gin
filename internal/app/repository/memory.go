@@ -85,6 +85,7 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 				var v = strings.Fields(value)
 				if uid == v[2] && rr == v[0] {
 					copy(r.memory[i:], r.memory[i+1:])
+					r.memory = r.memory[:len(r.memory)-1]
 				}
 			}
 
