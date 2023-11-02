@@ -62,9 +62,6 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	if answer == "deleted" {
 		ctx.Data(http.StatusGone, "text/plain", []byte(answer))
 	}
-	if answer == "f" {
-		ctx.Data(http.StatusGone, "text/plain", []byte(answer))
-	}
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))

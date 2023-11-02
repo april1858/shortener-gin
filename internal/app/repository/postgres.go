@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -135,7 +134,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 	db := d.connPGS
 
 	go func() {
-		wg := &sync.WaitGroup{}
+		//wg := &sync.WaitGroup{}
 
 		var s = <-c
 		data := s.Data
@@ -150,7 +149,7 @@ func (d *DB) Delete(ctx *gin.Context, c chan S) {
 			}
 		}
 
-		wg.Wait()
+		//wg.Wait()
 	}()
 
 	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)

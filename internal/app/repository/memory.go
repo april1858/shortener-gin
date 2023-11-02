@@ -38,7 +38,7 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 		if short == v[0] {
 			for _, vv := range f {
 				if short == vv {
-					return "f", nil
+					return "deleted", nil
 				}
 			}
 			return v[1], nil
@@ -73,7 +73,7 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 
 func (r *Memory) Delete(_ *gin.Context, c chan S) {
 	go func() {
-		wg := &sync.WaitGroup{}
+		//wg := &sync.WaitGroup{}
 		var s = <-c
 		data := s.Data
 		fmt.Println("data - ", data)
@@ -89,6 +89,6 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 
 		}
 
-		wg.Wait()
+		//wg.Wait()
 	}()
 }
