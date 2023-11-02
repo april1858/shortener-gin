@@ -81,7 +81,8 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 		fmt.Println("r.memory - ", r.memory)
 		for _, rr := range data {
 			f = append(f, rr)
-			fmt.Println("f = ", f)
+		}
+		for _, rr := range f {
 			for i, value := range r.memory {
 				var v = strings.Fields(value)
 				if uid == v[2] && rr == v[0] {
