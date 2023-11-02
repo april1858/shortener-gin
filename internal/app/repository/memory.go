@@ -33,14 +33,14 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
+	for _, vv := range f {
+		if short == vv {
+			return "deleted", nil
+		}
+	}
 	for _, value := range r.memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
-			for _, vv := range f {
-				if short == vv {
-					return "deleted", nil
-				}
-			}
 			return v[1], nil
 		}
 	}
@@ -81,8 +81,7 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 		fmt.Println("r.memory - ", r.memory)
 		for _, rr := range data {
 			f = append(f, rr)
-		}
-		for _, rr := range f {
+			fmt.Println("f = ", f)
 			for i, value := range r.memory {
 				var v = strings.Fields(value)
 				if uid == v[2] && rr == v[0] {
