@@ -78,6 +78,7 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 		data := s.Data
 		fmt.Println("data - ", data)
 		uid := s.UID
+		fmt.Println("r.memory - ", r.memory)
 		for _, rr := range data {
 			f = append(f, rr)
 			for i, value := range r.memory {
@@ -88,7 +89,7 @@ func (r *Memory) Delete(_ *gin.Context, c chan S) {
 			}
 
 		}
-
+		fmt.Println("r.memory2 - ", r.memory)
 		//wg.Wait()
 	}()
 }
