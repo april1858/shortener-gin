@@ -36,6 +36,11 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	for _, value := range r.memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
+			for _, vv := range f {
+				if short == vv {
+					return "f", nil
+				}
+			}
 			return v[1], nil
 		}
 	}
