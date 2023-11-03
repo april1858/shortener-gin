@@ -166,16 +166,8 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	fmt.Println("remove - ", remove)
 	go func(cc chan repository.S) {
 		cc <- s
-		//fmt.Println("s - ", cc)
-		//e.s.Delete(ctx, cc)
 	}(c)
 	e.s.Delete(ctx, c)
-	/*
-		if err != nil {
-			ctx.Data(http.StatusBadRequest, "application/json", []byte(err.Error()))
-		}
-		answer := "deleted - " + fmt.Sprint(removed)
-	*/
 	ctx.Data(http.StatusAccepted, "application/json", []byte("OK"))
 
 }
