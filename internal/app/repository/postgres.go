@@ -138,7 +138,7 @@ func (d *DB) Del(p []S) {
 		}
 
 	}
-	_, err := db.Exec(nil, `DELETE FROM shortener6 WHERE condition = false`)
+	_, err := db.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
 
 	if err != nil {
 		fmt.Println(err)
