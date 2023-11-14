@@ -47,7 +47,7 @@ func New(c *config.Config) (*Service, chan repository.S, error) {
 			if i == 11 {
 				r.Del(p)
 				i = 0
-				p = nil
+				p = p[:0]
 			}
 		}
 	}()
