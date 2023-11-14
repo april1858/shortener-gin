@@ -137,7 +137,7 @@ func (d *DB) Del(p []S) {
 				fmt.Println("err postgres -", err)
 			}
 		}
-		time.Sleep(29 * time.Second)
+		time.Sleep(69 * time.Second)
 		_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
 
 		if err != nil {
