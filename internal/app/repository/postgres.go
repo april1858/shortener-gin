@@ -76,7 +76,7 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	var a1 string
-	a2 := true
+	var a2 bool
 	db := d.connPGS
 	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
 	if err != nil {
