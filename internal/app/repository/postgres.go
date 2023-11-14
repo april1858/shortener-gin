@@ -136,10 +136,11 @@ func (d *DB) Del(p []S) {
 				fmt.Println("err postgres -", err)
 			}
 		}
-		//		_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
 
-		//		if err != nil {
-		//			fmt.Println(err)
-		//		}
+	}
+	_, err := db.Exec(nil, `DELETE FROM shortener6 WHERE condition = false`)
+
+	if err != nil {
+		fmt.Println(err)
 	}
 }
