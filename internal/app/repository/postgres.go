@@ -16,8 +16,6 @@ type DB struct {
 	db      string
 }
 
-var f = make([]string, 0, 1)
-
 func NewDBStorage(db string) (*DB, error) {
 	ctx := new(gin.Context)
 	var conn *pgxpool.Pool
@@ -78,14 +76,9 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	var a1 string
 	a2 := true
-	for _, a := range f {
-		if short == a {
-			a2 = false
-		}
-	}
 	db := d.connPGS
-	err := db.QueryRow(ctx, `select original_url from shortener6 where short_url=$1`, short).Scan(&a1)
-	if err != nil && a2 {
+	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
+	if err != nil {
 		return "", err
 	}
 	if !a2 {
