@@ -24,14 +24,17 @@ type Service interface {
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
-	Delete(*gin.Context, chan repository.S)
+	// Delete(*gin.Context, repository.S)
 }
 
 type Endpoint struct {
 	s Service
 }
 
-func New(s Service) *Endpoint {
+var ch chan repository.S
+
+func New(s Service, c chan repository.S) *Endpoint {
+	ch = c
 	return &Endpoint{
 		s: s,
 	}
@@ -155,19 +158,24 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 
 func (e *Endpoint) Delete(ctx *gin.Context) {
 	uid := ctx.MustGet("UID").(string)
-	c := make(chan repository.S)
 	remove := make([]string, 1)
 	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
-	s := repository.S{UID: uid, Data: remove}
-	fmt.Println("remove - ", remove)
-	go func(cc chan repository.S) {
-		cc <- s
-	}(c)
-	e.s.Delete(ctx, c)
+	st := repository.S{UID: uid, Data: remove, Ctx: ctx}
+	go func() {
+		ch <- st
+		// fmt.Println("s - ", cc)
+		// e.s.Delete(ctx, cc)
+	}()
+	//e.s.Delete(ctx, c)
+	/*
+	   if err != nil {
+	   ctx.Data(http.StatusBadRequest, "application/json", []byte(err.Error()))
+	   }
+	   answer := "deleted - " + fmt.Sprint(removed)
+	*/
 	ctx.Data(http.StatusAccepted, "application/json", []byte("OK"))
-
 }

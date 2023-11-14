@@ -129,29 +129,25 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-func (d *DB) Delete(ctx *gin.Context, c chan S) {
-
+func (d *DB) Del(p []S) {
 	db := d.connPGS
+	for _, s := range p {
+		data := s.Data
+		uid := s.UID
+		ctx := s.Ctx
 
-	//go func() {
-
-	var s = <-c
-	data := s.Data
-	fmt.Println("data - ", data)
-	uid := s.UID
-	for _, r := range data {
-		f = append(f, r)
-		_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-		//removed = x.RowsAffected()
-		if err != nil {
-			fmt.Println("err postgres -", err)
+		for _, r := range data {
+			_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			// removed = x.RowsAffected()
+			if err != nil {
+				fmt.Println("err postgres -", err)
+			}
 		}
-	}
 
-	//}()
+		_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
 
-	_, err := db.Exec(ctx, `DELETE FROM shortener6 WHERE condition = false`)
-	if err != nil {
-		fmt.Println(err)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }

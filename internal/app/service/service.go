@@ -16,30 +16,45 @@ type Repository interface {
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
-	Delete(*gin.Context, chan repository.S)
+	Del([]repository.S)
 }
 
 type Service struct {
 	r Repository
 }
 
-func New(c *config.Config) (*Service, error) {
+var ch chan repository.S
+
+func New(c *config.Config) (*Service, chan repository.S, error) {
+	ch = make(chan repository.S)
 	var r Repository
 	var err error
 	switch {
 	case c.DatabaseDsn != "":
 		r, err = repository.NewDBStorage(c.DatabaseDsn)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	case c.FileStoragePath != "":
 		r = repository.NewFileStorage(c.FileStoragePath)
 	default:
 		r = repository.NewMemStorage()
 	}
+	go func() {
+		var p []repository.S
+		for i := 0; i < 3; i++ {
+			p = append(p, <-ch)
+			if i == 2 {
+				r.Del(p)
+				i = 0
+				p = nil
+			}
+		}
+	}()
+
 	return &Service{
 		r: r,
-	}, nil
+	}, ch, nil
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
@@ -96,8 +111,4 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 func (s *Service) Ping() (string, error) {
 	answer, err := s.r.Ping()
 	return answer, err
-}
-
-func (s *Service) Delete(ctx *gin.Context, c chan repository.S) {
-	s.r.Delete(ctx, c)
 }

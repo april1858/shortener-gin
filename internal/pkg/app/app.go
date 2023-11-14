@@ -6,15 +6,16 @@ import (
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
 	"github.com/april1858/shortener-gin/internal/app/middleware"
+	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
 	"github.com/gin-gonic/gin"
 )
 
 type App struct {
 	endpoint *endpoint.Endpoint
-	//repoDB     *repository.DB
-	//repoFile   *repository.File
-	//repoMemory *repository.Memory
+	// repoDB *repository.DB
+	// repoFile *repository.File
+	// repoMemory *repository.Memory
 	service *service.Service
 	route   *gin.Engine
 	config  *config.Config
@@ -23,15 +24,16 @@ type App struct {
 
 func New() (*App, error) {
 	var err error
+	var ch chan repository.S
 	a := &App{}
 
 	a.config = config.New()
 
-	a.service, err = service.New(a.config)
+	a.service, ch, err = service.New(a.config)
 	if err != nil {
 		fmt.Println("DB error!")
 	}
-	a.endpoint = endpoint.New(a.service)
+	a.endpoint = endpoint.New(a.service, ch)
 
 	a.mw = middleware.New()
 

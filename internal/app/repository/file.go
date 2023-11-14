@@ -101,6 +101,6 @@ func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (f *File) Delete(_ *gin.Context, _ chan S) {
+func (f *File) Del(p []S) {
 	fmt.Println("!!")
 }

@@ -12,6 +12,7 @@ import (
 type S struct {
 	UID  string
 	Data []string
+	Ctx  *gin.Context
 }
 
 type Memory struct {
@@ -33,11 +34,6 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	for _, vv := range f {
-		if short == vv {
-			return "deleted", nil
-		}
-	}
 	for _, value := range r.memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
@@ -71,25 +67,6 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Delete(_ *gin.Context, c chan S) {
-	//go func() {
-	var s = <-c
-	data := s.Data
-	fmt.Println("data - ", data)
-	uid := s.UID
-	fmt.Println("r.memory - ", r.memory)
-	for _, rr := range data {
-		f = append(f, rr)
-		fmt.Println("f = ", f)
-		for i, value := range r.memory {
-			var v = strings.Fields(value)
-			if uid == v[2] && rr == v[0] {
-				copy(r.memory[i:], r.memory[i+1:])
-				r.memory = r.memory[:len(r.memory)-1]
-			}
-		}
-
-	}
-	fmt.Println("r.memory2 - ", r.memory)
-	//}()
+func (r *Memory) Del(p []S) {
+	fmt.Println("!")
 }
