@@ -42,9 +42,9 @@ func New(c *config.Config) (*Service, chan repository.S, error) {
 	}
 	go func() {
 		var p []repository.S
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 12; i++ {
 			p = append(p, <-ch)
-			if i == 2 {
+			if i == 11 {
 				r.Del(p)
 				i = 0
 				p = nil
