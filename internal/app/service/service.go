@@ -3,6 +3,8 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/repository"
@@ -40,17 +42,19 @@ func New(c *config.Config) (*Service, chan repository.S, error) {
 	default:
 		r = repository.NewMemStorage()
 	}
-	go func() {
-		var p []repository.S
-		for i := 0; i < 12; i++ {
-			p = append(p, <-ch)
-			if i == 11 {
-				r.Del(p)
-				i = 0
-				p = p[:0]
+	dests := Split(ch, 5)
+
+	var wg sync.WaitGroup
+	wg.Add(len(dests))
+	for i, ch := range dests {
+		go func(i int, d chan repository.S) {
+			defer wg.Done()
+			for val := range d {
+				fmt.Printf("#%d got %v\n", i, val)
 			}
-		}
-	}()
+		}(i, ch)
+	}
+	wg.Wait()
 
 	return &Service{
 		r: r,
@@ -111,4 +115,20 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 func (s *Service) Ping() (string, error) {
 	answer, err := s.r.Ping()
 	return answer, err
+}
+
+func Split(source chan repository.S, n int) []chan repository.S {
+	dests := make([]chan repository.S, 0)
+	for i := 0; i < n; i++ {
+		// Создать n выходных каналов
+		ch := make(chan repository.S)
+		dests = append(dests, ch)
+		go func() {
+			defer close(ch)
+			for val := range source {
+				ch <- val
+			}
+		}()
+	}
+	return dests
 }
