@@ -9,23 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Repository interface {
-	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
-	Find(ctx *gin.Context, short string) (string, error)
-	FindByUID(*gin.Context, string) ([]string, error)
-	StoreBatch(*gin.Context, []map[string]string) error
-	Ping() (string, error)
-	Del(repository.S)
-}
-
 type Service struct {
-	r Repository
+	r repository.Repository
 }
 
-func New(r Repository) (*Service, error) {
+//var ch chan repository.S
+
+func New(r repository.Repository, ch chan repository.S) (*Service, chan repository.S) {
 	return &Service{
 		r: r,
-	}, nil
+	}, ch
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {

@@ -13,13 +13,11 @@ import (
 
 type App struct {
 	endpoint   *endpoint.Endpoint
-	repository repository.Rep
-	// repoFile *repository.File
-	// repoMemory *repository.Memory
-	service *service.Service
-	route   *gin.Engine
-	config  *config.Config
-	mw      *middleware.MW
+	repository repository.Repository
+	service    *service.Service
+	route      *gin.Engine
+	config     *config.Config
+	mw         *middleware.MW
 }
 
 func New() (*App, error) {
@@ -30,8 +28,11 @@ func New() (*App, error) {
 	a.config = config.New()
 
 	a.repository, ch, err = repository.New(a.config)
+	if err != nil {
+		fmt.Println("err Rep")
+	}
 
-	a.service, err = service.New(a.repository)
+	a.service, ch = service.New(a.repository, ch)
 	if err != nil {
 		fmt.Println("DB error!")
 	}

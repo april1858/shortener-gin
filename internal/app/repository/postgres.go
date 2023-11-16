@@ -31,7 +31,9 @@ func NewDBStorage(db string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	go fannel(&DB{})
+
+	go funnel(conn)
+
 	return &DB{
 		connPGS: conn,
 		db:      db,
@@ -123,28 +125,36 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-func fannel(d *DB) {
-	v := <-ch
-	(*DB).Del(d, v)
-}
+var buf = make([]S, 0)
 
-func (d *DB) Del(p S) {
-	db := d.connPGS
-	data := p.Data
-	uid := p.UID
-	for _, r := range data {
-		fmt.Println("r - ", r)
-		_, err := db.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-		// removed = x.RowsAffected()
-		if err != nil {
-			fmt.Println("err postgres -", err)
+func funnel(conn *pgxpool.Pool) {
+	for {
+		select {
+		case v := <-ch:
+			buf = append(buf, v)
+			if len(buf) >= 10 {
+				data := v.Data
+				uid := v.UID
+				for _, r := range data {
+					fmt.Println("r - ", r)
+					_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+					// removed = x.RowsAffected()
+					if err != nil {
+						fmt.Println("err postgres -", err)
+					}
+				}
+				buf = buf[:0]
+			}
 		}
 	}
-	/*
-		_, err := db.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
+	// Del(conn)
+}
 
-		if err != nil {
-			fmt.Println(err)
-		}
-	*/
+func Del(conn *pgxpool.Pool) {
+
+	_, err := conn.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }

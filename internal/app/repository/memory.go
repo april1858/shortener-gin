@@ -10,7 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Rep interface {
+type Repository interface {
+	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
+	Find(ctx *gin.Context, short string) (string, error)
+	FindByUID(*gin.Context, string) ([]string, error)
+	StoreBatch(*gin.Context, []map[string]string) error
+	Ping() (string, error)
+	//Del(S)
 }
 
 type S struct {
@@ -25,8 +31,8 @@ type Memory struct {
 
 var ch = make(chan S)
 
-func New(c *config.Config) (Rep, chan S, error) {
-	var r Rep
+func New(c *config.Config) (Repository, chan S, error) {
+	var r Repository
 	var err error
 	switch {
 	case c.DatabaseDsn != "":
