@@ -164,18 +164,9 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
-	st := repository.S{UID: uid, Data: remove, Ctx: ctx}
+	st := repository.S{UID: uid, Data: remove}
 	go func() {
 		ch <- st
-		// fmt.Println("s - ", cc)
-		// e.s.Delete(ctx, cc)
 	}()
-	//e.s.Delete(ctx, c)
-	/*
-	   if err != nil {
-	   ctx.Data(http.StatusBadRequest, "application/json", []byte(err.Error()))
-	   }
-	   answer := "deleted - " + fmt.Sprint(removed)
-	*/
 	ctx.Data(http.StatusAccepted, "application/json", []byte("OK"))
 }

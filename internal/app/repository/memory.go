@@ -6,18 +6,40 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
 )
+
+type Rep interface {
+}
 
 type S struct {
 	UID  string
 	Data []string
-	Ctx  *gin.Context
 }
 
 type Memory struct {
 	mx     sync.RWMutex
 	memory []string
+}
+
+var ch = make(chan S)
+
+func New(c *config.Config) (Rep, chan S, error) {
+	var r Rep
+	var err error
+	switch {
+	case c.DatabaseDsn != "":
+		r, err = NewDBStorage(c.DatabaseDsn)
+		if err != nil {
+			return nil, nil, err
+		}
+	case c.FileStoragePath != "":
+		r = NewFileStorage(c.FileStoragePath)
+	default:
+		r = NewMemStorage()
+	}
+	return r, ch, nil
 }
 
 func NewMemStorage() *Memory {
@@ -67,6 +89,6 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Del(p []S) {
+func (r *Memory) Del(p S) {
 	fmt.Println("!")
 }

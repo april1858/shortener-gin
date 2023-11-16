@@ -3,10 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
-	"sync"
 
-	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
@@ -18,47 +15,17 @@ type Repository interface {
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
-	Del([]repository.S)
+	Del(repository.S)
 }
 
 type Service struct {
 	r Repository
 }
 
-var ch chan repository.S
-
-func New(c *config.Config) (*Service, chan repository.S, error) {
-	ch = make(chan repository.S)
-	var r Repository
-	var err error
-	switch {
-	case c.DatabaseDsn != "":
-		r, err = repository.NewDBStorage(c.DatabaseDsn)
-		if err != nil {
-			return nil, nil, err
-		}
-	case c.FileStoragePath != "":
-		r = repository.NewFileStorage(c.FileStoragePath)
-	default:
-		r = repository.NewMemStorage()
-	}
-	dests := Split(ch, 5)
-
-	var wg sync.WaitGroup
-	wg.Add(len(dests))
-	for i, ch := range dests {
-		go func(i int, d chan repository.S) {
-			defer wg.Done()
-			for val := range d {
-				fmt.Printf("#%d got %v\n", i, val)
-			}
-		}(i, ch)
-	}
-	wg.Wait()
-
+func New(r Repository) (*Service, error) {
 	return &Service{
 		r: r,
-	}, ch, nil
+	}, nil
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
@@ -115,20 +82,4 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 func (s *Service) Ping() (string, error) {
 	answer, err := s.r.Ping()
 	return answer, err
-}
-
-func Split(source chan repository.S, n int) []chan repository.S {
-	dests := make([]chan repository.S, 0)
-	for i := 0; i < n; i++ {
-		// Создать n выходных каналов
-		ch := make(chan repository.S)
-		dests = append(dests, ch)
-		go func() {
-			defer close(ch)
-			for val := range source {
-				ch <- val
-			}
-		}()
-	}
-	return dests
 }

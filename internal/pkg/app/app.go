@@ -12,8 +12,8 @@ import (
 )
 
 type App struct {
-	endpoint *endpoint.Endpoint
-	// repoDB *repository.DB
+	endpoint   *endpoint.Endpoint
+	repository repository.Rep
 	// repoFile *repository.File
 	// repoMemory *repository.Memory
 	service *service.Service
@@ -29,7 +29,9 @@ func New() (*App, error) {
 
 	a.config = config.New()
 
-	a.service, ch, err = service.New(a.config)
+	a.repository, ch, err = repository.New(a.config)
+
+	a.service, err = service.New(a.repository)
 	if err != nil {
 		fmt.Println("DB error!")
 	}

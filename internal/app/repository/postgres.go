@@ -31,6 +31,7 @@ func NewDBStorage(db string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	go fannel(&DB{})
 	return &DB{
 		connPGS: conn,
 		db:      db,
@@ -122,25 +123,28 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-func (d *DB) Del(p []S) {
+func fannel(d *DB) {
+	v := <-ch
+	(*DB).Del(d, v)
+}
+
+func (d *DB) Del(p S) {
 	db := d.connPGS
-	for _, s := range p {
-		data := s.Data
-		uid := s.UID
-		ctx := s.Ctx
-
-		for _, r := range data {
-			_, err := db.Exec(ctx, `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-			// removed = x.RowsAffected()
-			if err != nil {
-				fmt.Println("err postgres -", err)
-			}
+	data := p.Data
+	uid := p.UID
+	for _, r := range data {
+		fmt.Println("r - ", r)
+		_, err := db.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+		// removed = x.RowsAffected()
+		if err != nil {
+			fmt.Println("err postgres -", err)
 		}
-
 	}
-	_, err := db.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
+	/*
+		_, err := db.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
 
-	if err != nil {
-		fmt.Println(err)
-	}
+		if err != nil {
+			fmt.Println(err)
+		}
+	*/
 }
