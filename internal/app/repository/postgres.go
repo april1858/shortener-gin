@@ -145,7 +145,7 @@ func funnel(conn *pgxpool.Pool) {
 			buf = buf[:0]
 		}
 	}
-	// Del(conn)
+	Del(conn)
 }
 
 func Del(conn *pgxpool.Pool) {
