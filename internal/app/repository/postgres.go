@@ -130,19 +130,15 @@ var buf = make([]S, 0)
 func funnel(conn *pgxpool.Pool) {
 	for range ch {
 		v := <-ch
-		buf = append(buf, v)
-		if len(buf) >= 10 {
-			data := v.Data
-			uid := v.UID
-			for _, r := range data {
-				fmt.Println("r - ", r)
-				_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-				// removed = x.RowsAffected()
-				if err != nil {
-					fmt.Println("err postgres -", err)
-				}
+		data := v.Data
+		uid := v.UID
+		for _, r := range data {
+			fmt.Println("r - ", r)
+			_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			// removed = x.RowsAffected()
+			if err != nil {
+				fmt.Println("err postgres -", err)
 			}
-			buf = buf[:0]
 		}
 	}
 	Del(conn)

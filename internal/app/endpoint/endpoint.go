@@ -44,7 +44,6 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	contentType := "text/plain"
 	var status int = http.StatusCreated
 	originalURL, _ := ctx.GetRawData()
-	fmt.Println("orURL - ", string(originalURL))
 	_, err := url.ParseRequestURI(string(originalURL))
 	if err != nil {
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Не правильный URL"))
