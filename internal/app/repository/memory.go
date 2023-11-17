@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
@@ -52,14 +53,14 @@ func New(c *config.Config) (Repository, chan S, error) {
 func NewMemStorage() *Memory {
 	m := make([]string, 0, 1)
 
-	go funnelm()
+	go funnelm(m)
 
 	return &Memory{memory: m}
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.memory = append(r.memory, short+" "+original+" "+uid)
+	r.memory = append(r.memory, short+" "+original+" "+uid+" true")
 	return "", nil
 }
 
@@ -100,12 +101,28 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func funnelm() {
+func funnelm(m []string) {
 	v := <-ch
-	fmt.Println("funnelm v - ", v)
-	Delm(v)
+	fmt.Println("funnel v - ", v)
+	data := v.Data
+	uid := v.UID
+	for _, rd := range data {
+		for _, value := range m {
+			var v = strings.Fields(value)
+			if uid == v[2] && rd == v[0] {
+				v[3] = "false"
+			}
+		}
+	}
+	time.Sleep(time.Second * 60)
+	Delm(m)
 }
 
-func Delm(p S) {
-	fmt.Println("Delm - ", p)
+func Delm(m []string) {
+	for i, value := range m {
+		var v = strings.Fields(value)
+		if v[3] == "false" {
+			m = append(m[:i], m[i+1:]...)
+		}
+	}
 }

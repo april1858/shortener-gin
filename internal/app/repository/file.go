@@ -106,7 +106,7 @@ func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 func funnelf() {
 	v := <-ch
 	fmt.Println("funnelf v - ", v)
-	Delm(v)
+	Delf(v)
 }
 
 func Delf(p S) {
