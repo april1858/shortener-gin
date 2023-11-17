@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -129,12 +128,10 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 var buf = make([]S, 0)
 
 func funnel(conn *pgxpool.Pool) {
-	var wg sync.WaitGroup
 	v := <-ch
 	buf = append(buf, v)
 	if len(buf) >= 10 {
 		for _, d := range buf {
-			wg.Add(1)
 			data := d.Data
 			uid := d.UID
 			for _, r := range data {
@@ -145,10 +142,8 @@ func funnel(conn *pgxpool.Pool) {
 					fmt.Println("err postgres -", err)
 				}
 			}
-			wg.Done()
 		}
 		buf = buf[:0]
-		wg.Wait()
 	}
 
 	Del(conn)
