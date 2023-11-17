@@ -148,8 +148,9 @@ func funnel(conn *pgxpool.Pool) {
 			wg.Done()
 		}
 		buf = buf[:0]
+		wg.Wait()
 	}
-	wg.Wait()
+
 	Del(conn)
 }
 
