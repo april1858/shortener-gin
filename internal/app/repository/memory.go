@@ -45,6 +45,9 @@ func New(c *config.Config) (Repository, chan S, error) {
 	default:
 		r = NewMemStorage()
 	}
+
+	go funnelm()
+
 	return r, ch, nil
 }
 
@@ -95,6 +98,26 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (r *Memory) Del(p S) {
-	fmt.Println("!")
+func funnelm() {
+	var wg sync.WaitGroup
+	v := <-ch
+	buf = append(buf, v)
+	if len(buf) >= 10 {
+		for _, d := range buf {
+			wg.Add(1)
+			data := d.Data
+			uid := d.UID
+			for _, r := range data {
+				fmt.Println("memory r and uid - ", r, uid)
+			}
+			wg.Done()
+		}
+		buf = buf[:0]
+	}
+	wg.Wait()
+	Delm(v)
+}
+
+func Delm(p S) {
+	fmt.Println("Delm - ", p)
 }
