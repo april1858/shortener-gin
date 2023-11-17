@@ -55,6 +55,7 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 }
 
 func (f *File) Find(_ *gin.Context, short string) (string, error) {
+	fmt.Println("Findf")
 	f.mx.Lock()
 	defer f.mx.Unlock()
 	fileData, err := os.ReadFile(f.filename)

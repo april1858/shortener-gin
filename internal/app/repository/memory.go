@@ -64,6 +64,7 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
+	fmt.Println("Findm")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
