@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -140,6 +141,7 @@ func funnel(conn *pgxpool.Pool) {
 			fmt.Println("err postgres -", err)
 		}
 	}
+	time.Sleep(time.Second * 60)
 	Del(conn)
 }
 
