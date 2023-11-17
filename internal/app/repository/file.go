@@ -17,6 +17,7 @@ type File struct {
 }
 
 func NewFileStorage(f string) *File {
+	go funnelf()
 	return &File{filename: f}
 }
 
@@ -101,6 +102,12 @@ func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func (f *File) Del(p S) {
-	fmt.Println("!!")
+func funnelf() {
+	v := <-ch
+	fmt.Println("funnelf v - ", v)
+	Delm(v)
+}
+
+func Delf(p S) {
+	fmt.Println("Delf - ", p)
 }

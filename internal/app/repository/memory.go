@@ -46,13 +46,14 @@ func New(c *config.Config) (Repository, chan S, error) {
 		r = NewMemStorage()
 	}
 
-	go funnelm()
-
 	return r, ch, nil
 }
 
 func NewMemStorage() *Memory {
 	m := make([]string, 0, 1)
+
+	go funnelm()
+
 	return &Memory{memory: m}
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
