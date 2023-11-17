@@ -165,6 +165,7 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
 	}
 	st := repository.S{UID: uid, Data: remove}
+	fmt.Println("endpoint st - ", st)
 	go func() {
 		ch <- st
 	}()

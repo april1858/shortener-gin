@@ -129,6 +129,7 @@ var buf = make([]S, 0)
 
 func funnel(conn *pgxpool.Pool) {
 	v := <-ch
+	fmt.Println("funnel v - ", v)
 	data := v.Data
 	uid := v.UID
 	for _, r := range data {
