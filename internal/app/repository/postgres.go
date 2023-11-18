@@ -130,7 +130,7 @@ var buf = make([]S, 0)
 
 func funnel(conn *pgxpool.Pool) {
 	v := <-ch
-	time.Sleep(time.Second * 2)
+	//time.Sleep(time.Second * 2)
 	data := v.Data
 	uid := v.UID
 	for _, r := range data {
