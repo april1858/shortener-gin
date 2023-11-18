@@ -135,12 +135,11 @@ func funnel(conn *pgxpool.Pool) {
 		uid := v.UID
 		for _, r := range data {
 			_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-			// removed = x.RowsAffected()
 			if err != nil {
 				fmt.Println("err postgres -", err)
 			}
 		}
-		time.Sleep(time.Second * 59)
+		time.Sleep(time.Second * 159)
 		Del(conn)
 	}
 }
