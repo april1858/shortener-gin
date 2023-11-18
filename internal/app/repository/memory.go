@@ -106,6 +106,7 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 }
 
 func funnelm(m *Memory) {
+	fmt.Println("funnelm")
 	v := <-ch
 	data := v.Data
 	uid := v.UID
