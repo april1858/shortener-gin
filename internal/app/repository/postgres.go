@@ -130,6 +130,7 @@ var buf = make([]S, 0)
 
 func funnel(conn *pgxpool.Pool) {
 	v := <-ch
+	time.Sleep(time.Second * 29)
 	data := v.Data
 	uid := v.UID
 	for _, r := range data {
@@ -139,7 +140,7 @@ func funnel(conn *pgxpool.Pool) {
 			fmt.Println("err postgres -", err)
 		}
 	}
-	time.Sleep(time.Second * 39)
+	time.Sleep(time.Second * 29)
 	Del(conn)
 }
 
