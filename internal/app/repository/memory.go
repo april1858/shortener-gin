@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/gin-gonic/gin"
@@ -106,20 +105,19 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 }
 
 func funnelm(m *Memory) {
-	fmt.Println("funnelm")
-	v := <-ch
-	data := v.Data
-	uid := v.UID
-	for _, rd := range data {
-		for i, value := range m.memory {
-			var v = strings.Fields(value)
-			fmt.Println("rd - ", rd, "v[0] - ", v[0])
-			if uid == v[2] && rd == v[0] {
-				m.memory[i] = v[0] + " " + v[1] + " " + v[2] + " " + "false"
+	for v := range ch {
+		data := v.Data
+		uid := v.UID
+		for _, rd := range data {
+			for i, value := range m.memory {
+				var v = strings.Fields(value)
+				fmt.Println("rd - ", rd, "v[0] - ", v[0])
+				if uid == v[2] && rd == v[0] {
+					m.memory[i] = v[0] + " " + v[1] + " " + v[2] + " " + "false"
+				}
 			}
 		}
 	}
-	time.Sleep(time.Second * 60)
 	Delm(m)
 }
 
