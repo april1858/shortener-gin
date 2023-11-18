@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -130,18 +131,18 @@ var i int
 
 func funnel(conn *pgxpool.Pool) {
 	for v := range ch {
-		fmt.Println("funnel v - ", v)
-	}
-	/*data := v.Data
-	uid := v.UID
-	for _, r := range data {
-		_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
-		// removed = x.RowsAffected()
-		if err != nil {
-			fmt.Println("err postgres -", err)
+		data := v.Data
+		uid := v.UID
+		for _, r := range data {
+			_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			// removed = x.RowsAffected()
+			if err != nil {
+				fmt.Println("err postgres -", err)
+			}
 		}
-	}*/
-	//Del(conn)
+		time.Sleep(time.Second * 59)
+		Del(conn)
+	}
 }
 
 func Del(conn *pgxpool.Pool) {
