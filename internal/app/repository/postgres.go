@@ -138,7 +138,7 @@ func funnel(conn *pgxpool.Pool) {
 			if err != nil {
 				fmt.Println("err postgres -", err)
 			}
-			time.Sleep(time.Second * 5)
+			time.Sleep(time.Second * 9)
 		}
 
 		Del(conn)
