@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -130,7 +129,6 @@ var buf = make([]S, 0)
 
 func funnel(conn *pgxpool.Pool) {
 	v := <-ch
-	//time.Sleep(time.Second * 2)
 	data := v.Data
 	uid := v.UID
 	for _, r := range data {
@@ -140,8 +138,7 @@ func funnel(conn *pgxpool.Pool) {
 			fmt.Println("err postgres -", err)
 		}
 	}
-	time.Sleep(time.Second * 5)
-	Del(conn)
+	//Del(conn)
 }
 
 func Del(conn *pgxpool.Pool) {
