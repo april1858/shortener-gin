@@ -17,6 +17,7 @@ type File struct {
 }
 
 func NewFileStorage(f string) *File {
+	fmt.Println("initf")
 	go funnelf()
 	return &File{filename: f}
 }

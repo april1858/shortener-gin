@@ -56,7 +56,7 @@ func NewMemStorage() *Memory {
 	m := make([]string, 0, 1)
 	p := &Memory{memory: m}
 	go funnelm(p)
-
+	fmt.Println("initm")
 	return p
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {

@@ -34,7 +34,7 @@ func NewDBStorage(db string) (*DB, error) {
 	}
 
 	go funnel(conn)
-
+	fmt.Println("initdb")
 	return &DB{
 		connPGS: conn,
 		db:      db,
