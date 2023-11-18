@@ -67,12 +67,14 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
-	fmt.Println("Findm")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
+			if v[3] == "f" {
+				return "deleted", nil
+			}
 			return v[1], nil
 		}
 	}
