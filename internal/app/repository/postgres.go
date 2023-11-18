@@ -134,7 +134,6 @@ func funnel(conn *pgxpool.Pool) {
 	data := v.Data
 	uid := v.UID
 	for _, r := range data {
-		fmt.Println("r - ", r)
 		_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
 		// removed = x.RowsAffected()
 		if err != nil {

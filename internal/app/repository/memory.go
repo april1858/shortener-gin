@@ -25,6 +25,8 @@ type S struct {
 	Data []string
 }
 
+var memory = make([]string, 0)
+
 type Memory struct {
 	mx     sync.RWMutex
 	memory []string
@@ -52,15 +54,15 @@ func New(c *config.Config) (Repository, chan S, error) {
 
 func NewMemStorage() *Memory {
 	m := make([]string, 0, 1)
+	p := &Memory{memory: m}
+	go funnelm(p)
 
-	go funnelm(m)
-
-	return &Memory{memory: m}
+	return p
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.memory = append(r.memory, short+" "+original+" "+uid+" true")
+	r.memory = append(r.memory, short+" "+original+" "+uid+" "+"true")
 	return "", nil
 }
 
@@ -101,16 +103,16 @@ func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
 	return nil
 }
 
-func funnelm(m []string) {
+func funnelm(m *Memory) {
 	v := <-ch
-	fmt.Println("funnel v - ", v)
 	data := v.Data
 	uid := v.UID
 	for _, rd := range data {
-		for _, value := range m {
+		for i, value := range m.memory {
 			var v = strings.Fields(value)
+			fmt.Println("rd - ", rd, "v[0] - ", v[0])
 			if uid == v[2] && rd == v[0] {
-				v[3] = "false"
+				m.memory[i] = v[0] + v[1] + v[2] + "false"
 			}
 		}
 	}
@@ -118,11 +120,11 @@ func funnelm(m []string) {
 	Delm(m)
 }
 
-func Delm(m []string) {
-	for i, value := range m {
+func Delm(m *Memory) {
+	for i, value := range m.memory {
 		var v = strings.Fields(value)
 		if v[3] == "false" {
-			m = append(m[:i], m[i+1:]...)
+			m.memory = append(m.memory[:i], m.memory[i+1:]...)
 		}
 	}
 }
