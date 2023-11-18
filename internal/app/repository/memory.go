@@ -72,7 +72,7 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	for _, value := range r.memory {
 		var v = strings.Fields(value)
 		if short == v[0] {
-			if v[3] == "f" {
+			if v[3] == "false" {
 				return "deleted", nil
 			}
 			return v[1], nil
