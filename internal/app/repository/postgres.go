@@ -125,9 +125,6 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
-var buf = make([]S, 0)
-var i int
-
 func funnel(conn *pgxpool.Pool) {
 	for v := range ch {
 		data := v.Data

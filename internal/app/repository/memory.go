@@ -111,7 +111,6 @@ func funnelm(m *Memory) {
 		for _, rd := range data {
 			for i, value := range m.memory {
 				var v = strings.Fields(value)
-				fmt.Println("rd - ", rd, "v[0] - ", v[0])
 				if uid == v[2] && rd == v[0] {
 					m.memory[i] = v[0] + " " + v[1] + " " + v[2] + " " + "false"
 				}
