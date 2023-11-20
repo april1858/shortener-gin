@@ -143,8 +143,8 @@ func funnelf(f *File) {
 		if err != nil {
 			log.Println("error ", err)
 		}
-		Delf(f, data)
 	}
+	Delf(f, data)
 }
 
 func Delf(f *File, data []string) {

@@ -120,7 +120,6 @@ func funnelm(m *Memory) {
 				}
 			}
 		}
-
 	}
 	Delm(m)
 }
