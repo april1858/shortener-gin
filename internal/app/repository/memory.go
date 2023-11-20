@@ -24,7 +24,7 @@ type S struct {
 	Data []string
 }
 
-var memory = make([]string, 0)
+//var memory = make([]string, 0)
 
 type Memory struct {
 	mx     sync.RWMutex
@@ -100,7 +100,11 @@ func (r *Memory) Ping() (string, error) {
 	return "Yes! Ping from Memory\n", nil
 }
 
-func (r *Memory) StoreBatch(_ *gin.Context, _ []map[string]string) error {
+func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
+	for _, v := range batch {
+		r.memory = append(r.memory, v["short_url"]+" "+v["original_url"]+" "+v["uid"]+" "+"true")
+	}
+	fmt.Println("r.memory = ", r.memory)
 	return nil
 }
 
@@ -116,8 +120,8 @@ func funnelm(m *Memory) {
 				}
 			}
 		}
+		Delm(m)
 	}
-	Delm(m)
 }
 
 func Delm(m *Memory) {
