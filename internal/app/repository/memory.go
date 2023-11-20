@@ -128,9 +128,6 @@ func Delm(m *Memory) {
 	for i, value := range m.memory {
 		var v = strings.Fields(value)
 		if v[3] == "false" {
-			if len(m.memory) == 1 {
-				m.memory = nil
-			}
 			m.memory = append(m.memory[:i], m.memory[i+1:]...)
 		}
 	}
