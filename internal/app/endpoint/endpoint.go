@@ -138,11 +138,11 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte("{\"error\":"+err.Error()+"}"))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	answer, err := e.s.CreatorShortenedBatch(ctx, objQuery)
 	if err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte("{\"error\":"+err.Error()+"}"))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
@@ -151,7 +151,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	answer1, err := json.Marshal(objQuery)
 
 	if err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte("{\"error\":"+err.Error()+"}"))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
 }

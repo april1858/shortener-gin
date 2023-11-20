@@ -128,10 +128,10 @@ func Delm(m *Memory) {
 	for i, value := range m.memory {
 		var v = strings.Fields(value)
 		if v[3] == "false" {
-			m.memory[i] = m.memory[len(m.memory)-1]
-			m.memory[len(m.memory)-1] = ""
-			m.memory = m.memory[:len(m.memory)-1]
-			//m.memory = append(m.memory[:i], m.memory[i+1:]...)
+			if len(m.memory) == 1 {
+				m.memory = nil
+			}
+			m.memory = append(m.memory[:i], m.memory[i+1:]...)
 		}
 	}
 }
