@@ -69,7 +69,7 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
 		if value.Short == short {
-			if value.Condition == false {
+			if !value.Condition {
 				return "", entity.ErrDeleted
 			}
 			return value.Original, nil
@@ -121,7 +121,7 @@ func funnelm(m *Memory) {
 
 func Delm(m *Memory) {
 	for i, value := range m.memory {
-		if value.Condition == false {
+		if !value.Condition {
 			m.memory = append(m.memory[:i], m.memory[i+1:]...)
 		}
 	}
