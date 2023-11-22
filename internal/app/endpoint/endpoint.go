@@ -2,12 +2,14 @@ package endpoint
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
@@ -59,13 +61,13 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
-	if answer == "" {
-		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Not found"))
-	}
-	if answer == "deleted" {
-		ctx.Data(http.StatusGone, "text/plain", []byte(answer))
-	}
 	if err != nil {
+		if errors.Is(err, entity.ErrNotFound) {
+			ctx.Data(http.StatusBadRequest, "text/plain", []byte(err.Error()))
+		}
+		if errors.Is(err, entity.ErrDeleted) {
+			ctx.Data(http.StatusGone, "text/plain", []byte(err.Error()))
+		}
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
@@ -89,7 +91,7 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 		}
 		answer, err := json.Marshal(redirect)
 		if err != nil {
-			return
+			ctx.Data(http.StatusNoContent, "text/plain application/json", []byte(err.Error()))
 		}
 		ctx.Header("WWW-Authenticate", `Basic realm="api"`)
 		ctx.Data(http.StatusOK, "text/plain application/json", answer)
@@ -162,7 +164,7 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte("{\"error\":"+err.Error()+"}"))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	st := repository.S{UID: uid, Data: remove}
 	go func() {

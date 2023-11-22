@@ -70,10 +70,13 @@ func ReadSigned(sValue string) (string, error) {
 }
 
 func WriteSigned(name string) (string, string, error) {
-	uid := createCode()
+	uid, err := createCode()
+	if err != nil {
+		return "", "", err
+	}
 	value := uid
 	mac := hmac.New(sha256.New, secretKey)
-	_, err := mac.Write([]byte(name))
+	_, err = mac.Write([]byte(name))
 	if err != nil {
 		return "", "", err
 	}
@@ -87,12 +90,11 @@ func WriteSigned(name string) (string, string, error) {
 	return uid, value, nil
 }
 
-func createCode() string {
+func createCode() (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
-		return "error in createCode()"
+		return "", err
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }

@@ -29,13 +29,11 @@ func New() (*App, error) {
 
 	a.repository, ch, err = repository.New(a.config)
 	if err != nil {
-		fmt.Println("err Rep")
+		fmt.Println("error from repository", err)
 	}
 
 	a.service, ch = service.New(a.repository, ch)
-	if err != nil {
-		fmt.Println("DB error!")
-	}
+
 	a.endpoint = endpoint.New(a.service, ch)
 
 	a.mw = middleware.New()

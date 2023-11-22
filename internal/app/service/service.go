@@ -26,7 +26,7 @@ func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
 	if err != nil {
-		return "error from CreatorShortened()", err
+		return "", err
 	}
 	short := hex.EncodeToString(b)
 	shorter, err := s.r.Store(ctx, short, originalURL, uid)

@@ -1,12 +1,11 @@
 package repository
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,7 +54,6 @@ func NewMemStorage() *Memory {
 	m := make([]string, 0, 1)
 	p := &Memory{memory: m}
 	go funnelm(p)
-	fmt.Println("initm")
 	return p
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
@@ -72,12 +70,12 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 		var v = strings.Fields(value)
 		if short == v[0] {
 			if v[3] == "false" {
-				return "deleted", nil
+				return "", entity.ErrDeleted
 			}
 			return v[1], nil
 		}
 	}
-	return "", nil
+	return "", entity.ErrNotFound
 }
 
 func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
@@ -91,7 +89,7 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 		}
 	}
 	if len(answer) == 0 {
-		return nil, errors.New("NOT")
+		return nil, entity.ErrNotFound
 	}
 	return answer, nil
 }
@@ -104,7 +102,6 @@ func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	for _, v := range batch {
 		r.memory = append(r.memory, v["short_url"]+" "+v["original_url"]+" "+v["uid"]+" "+"true")
 	}
-	fmt.Println("r.memory = ", r.memory)
 	return nil
 }
 
