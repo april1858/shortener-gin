@@ -63,12 +63,17 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
+			fmt.Println("!")
 			ctx.Data(http.StatusBadRequest, "text/plain", []byte(err.Error()))
+			return
 		}
 		if errors.Is(err, entity.ErrDeleted) {
+			fmt.Println("!!")
 			ctx.Data(http.StatusGone, "text/plain", []byte(err.Error()))
+			return
 		}
 		s := fmt.Sprintf("Ошибка - %v", err)
+		fmt.Println("S", s)
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte(s))
 	} else {
 		ctx.Redirect(http.StatusTemporaryRedirect, answer)
