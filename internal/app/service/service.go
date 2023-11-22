@@ -4,41 +4,21 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
-	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Repository interface {
-	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
-	Find(ctx *gin.Context, short string) (string, error)
-	FindByUID(*gin.Context, string) ([]string, error)
-	StoreBatch(*gin.Context, []map[string]string) error
-	Ping() (string, error)
-}
-
 type Service struct {
-	r Repository
+	r repository.Repository
 }
 
-func New(c *config.Config) (*Service, error) {
-	var r Repository
-	var err error
-	switch {
-	case c.DatabaseDsn != "":
-		r, err = repository.NewDBStorage(c.DatabaseDsn)
-		if err != nil {
-			return nil, err
-		}
-	case c.FileStoragePath != "":
-		r = repository.NewFileStorage(c.FileStoragePath)
-	default:
-		r = repository.NewMemStorage()
-	}
+//var ch chan repository.S
+
+func New(r repository.Repository, ch chan repository.S) (*Service, chan repository.S) {
 	return &Service{
 		r: r,
-	}, nil
+	}, ch
 }
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {

@@ -27,10 +27,13 @@ func NewDBStorage(db string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = conn.Exec(ctx, `create table if not exists shortener ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE)`)
+	_, err = conn.Exec(ctx, `create table if not exists shortener6 ("id" SERIAL PRIMARY KEY, "uid" varchar(100), "short_url" varchar(50), "original_url" text UNIQUE, "condition" boolean DEFAULT true)`)
 	if err != nil {
 		return nil, err
 	}
+
+	go funnel(conn)
+	fmt.Println("initdb")
 	return &DB{
 		connPGS: conn,
 		db:      db,
@@ -56,12 +59,12 @@ func (d *DB) Ping() (string, error) {
 
 func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error) {
 	db := d.connPGS
-	if _, err := db.Exec(ctx, `insert into "shortener" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
+	if _, err := db.Exec(ctx, `insert into "shortener6" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
 				var answer string
-				row := db.QueryRow(ctx, `select short_url from "shortener" where original_url=$1`, original)
+				row := db.QueryRow(ctx, `select short_url from "shortener6" where original_url=$1`, original)
 				err := row.Scan(&answer)
 				if err != nil {
 					return "", err
@@ -74,20 +77,23 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 }
 
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
-	var answer string
+	var a1 string
+	var a2 bool
 	db := d.connPGS
-	row := db.QueryRow(ctx, `select original_url from shortener where short_url=$1`, short)
-	err := row.Scan(&answer)
+	err := db.QueryRow(ctx, `select original_url, condition from shortener6 where short_url=$1`, short).Scan(&a1, &a2)
 	if err != nil {
 		return "", err
 	}
-	return answer, nil
+	if !a2 {
+		a1 = "deleted"
+	}
+	return a1, nil
 }
 
 func (d *DB) FindByUID(ctx *gin.Context, uid string) ([]string, error) {
 	answer := make([]string, 0, 1)
 	db := d.connPGS
-	rows, err := db.Query(ctx, `select short_url, original_url from shortener where uid=$1`, uid)
+	rows, err := db.Query(ctx, `select short_url, original_url from shortener6 where uid=$1`, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +111,7 @@ func (d *DB) FindByUID(ctx *gin.Context, uid string) ([]string, error) {
 
 func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	db := d.connPGS
-	query := `INSERT INTO shortener (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
+	query := `INSERT INTO shortener6 (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
 	batch := &pgx.Batch{}
 	for _, bulk := range bulks {
 		args := pgx.NamedArgs{
@@ -117,4 +123,27 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	}
 	results := db.SendBatch(ctx, batch)
 	return results.Close()
+}
+
+func funnel(conn *pgxpool.Pool) {
+	for v := range ch {
+		data := v.Data
+		uid := v.UID
+		for _, r := range data {
+			_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = $2`, uid, r)
+			if err != nil {
+				fmt.Println("err postgres -", err)
+			}
+		}
+	}
+	Del(conn)
+}
+
+func Del(conn *pgxpool.Pool) {
+
+	_, err := conn.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }

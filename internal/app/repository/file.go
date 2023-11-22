@@ -16,7 +16,9 @@ type File struct {
 }
 
 func NewFileStorage(f string) *File {
-	return &File{filename: f}
+	p := &File{filename: f}
+	go funnelf(p)
+	return p
 }
 
 func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error) {
@@ -28,7 +30,7 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 		if os.IsNotExist(err) {
 			os.OpenFile(f.filename, os.O_CREATE, 0777)
 		}
-		data = append(data, short+" "+original+" "+uid)
+		data = append(data, short+" "+original+" "+uid+" "+"true")
 	} else {
 		content, err := os.ReadFile(f.filename)
 		if err != nil {
@@ -36,7 +38,7 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 			return "", err
 		}
 		json.Unmarshal(content, &data)
-		data = append(data, short+" "+original+" "+uid)
+		data = append(data, short+" "+original+" "+uid+" "+"true")
 	}
 
 	out, err := json.Marshal(data)
@@ -96,6 +98,69 @@ func (f *File) Ping() (string, error) {
 	return "Yes! Ping from File\n", nil
 }
 
-func (f *File) StoreBatch(_ *gin.Context, _ []map[string]string) error {
+func (f *File) StoreBatch(_ *gin.Context, batch []map[string]string) error {
+	data := make([]string, 0, 1)
+	for _, v := range batch {
+		data = append(data, v["short_url"]+" "+v["original_url"]+" "+v["uid"]+" "+"true")
+	}
+	out, err := json.Marshal(data)
+	if err != nil {
+		log.Println("error ", err)
+		return err
+	}
+	err = os.WriteFile(f.filename, out, 0644)
+	if err != nil {
+		log.Println("error ", err)
+		return err
+	}
 	return nil
+}
+
+func funnelf(f *File) {
+	data := make([]string, 0, 1)
+	for v := range ch {
+		vch := v.Data
+		uid := v.UID
+		for _, s := range vch {
+			content, err := os.ReadFile(f.filename)
+			if err != nil {
+				log.Println("error - ", err)
+				return
+			}
+			json.Unmarshal(content, &data)
+			for i, value := range data {
+				var w = strings.Fields(value)
+				if uid == w[2] && s == w[0] {
+					data[i] = w[0] + " " + w[1] + " " + w[2] + " " + "false"
+				}
+			}
+		}
+		out, err := json.Marshal(data)
+		if err != nil {
+			log.Println("error ", err)
+		}
+		err = os.WriteFile(f.filename, out, 0644)
+		if err != nil {
+			log.Println("error ", err)
+		}
+	}
+	Delf(f, data)
+}
+
+func Delf(f *File, data []string) {
+
+	for i, value := range data {
+		var v = strings.Fields(value)
+		if v[3] == "false" {
+			data = append(data[:i], data[i+1:]...)
+		}
+	}
+	out, err := json.Marshal(data)
+	if err != nil {
+		log.Println("error ", err)
+	}
+	err = os.WriteFile(f.filename, out, 0644)
+	if err != nil {
+		log.Println("error ", err)
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
+	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,19 +17,24 @@ type Redirect struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
+
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
+	// Delete(*gin.Context, repository.S)
 }
 
 type Endpoint struct {
 	s Service
 }
 
-func New(s Service) *Endpoint {
+var ch chan repository.S
+
+func New(s Service, c chan repository.S) *Endpoint {
+	ch = c
 	return &Endpoint{
 		s: s,
 	}
@@ -55,6 +61,9 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
 	if answer == "" {
 		ctx.Data(http.StatusBadRequest, "text/plain", []byte("Not found"))
+	}
+	if answer == "deleted" {
+		ctx.Data(http.StatusGone, "text/plain", []byte(answer))
 	}
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
@@ -129,11 +138,11 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	requestBody, _ := ctx.GetRawData()
 
 	if err := json.Unmarshal(requestBody, &objQuery); err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	answer, err := e.s.CreatorShortenedBatch(ctx, objQuery)
 	if err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
@@ -142,7 +151,22 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	answer1, err := json.Marshal(objQuery)
 
 	if err != nil {
-		ctx.Data(http.StatusCreated, "application/json", []byte(err.Error()))
+		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
+}
+
+func (e *Endpoint) Delete(ctx *gin.Context) {
+	uid := ctx.MustGet("UID").(string)
+	remove := make([]string, 1)
+	requestBody, _ := ctx.GetRawData()
+
+	if err := json.Unmarshal(requestBody, &remove); err != nil {
+		ctx.Data(http.StatusCreated, "application/json", []byte("{\"error\":"+err.Error()+"}"))
+	}
+	st := repository.S{UID: uid, Data: remove}
+	go func() {
+		ch <- st
+	}()
+	ctx.Data(http.StatusAccepted, "application/json", []byte("{\"OK\"}"))
 }
