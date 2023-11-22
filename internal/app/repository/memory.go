@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
@@ -25,9 +24,11 @@ type S struct {
 
 //var memory = make([]string, 0)
 
+type eS entity.StoreElem
+
 type Memory struct {
 	mx     sync.RWMutex
-	memory []string
+	memory []eS
 }
 
 var ch = make(chan S)
@@ -51,7 +52,7 @@ func New(c *config.Config) (Repository, chan S, error) {
 }
 
 func NewMemStorage() *Memory {
-	m := make([]string, 0, 1)
+	m := make([]eS, 0, 1)
 	p := &Memory{memory: m}
 	go funnelm(p)
 	return p
@@ -59,7 +60,7 @@ func NewMemStorage() *Memory {
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.memory = append(r.memory, short+" "+original+" "+uid+" "+"true")
+	r.memory = append(r.memory, eS{Short: short, Original: original, UID: uid, Condition: true})
 	return "", nil
 }
 
@@ -67,12 +68,11 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
-		var v = strings.Fields(value)
-		if short == v[0] {
-			if v[3] == "false" {
+		if value.Short == short {
+			if value.Condition == false {
 				return "", entity.ErrDeleted
 			}
-			return v[1], nil
+			return value.Original, nil
 		}
 	}
 	return "", entity.ErrNotFound
@@ -83,9 +83,8 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
 	for _, value := range r.memory {
-		var v = strings.Fields(value)
-		if uid == v[2] {
-			answer = append(answer, v[0]+" "+v[1])
+		if uid == value.UID {
+			answer = append(answer, value.Short+" "+value.Original)
 		}
 	}
 	if len(answer) == 0 {
@@ -100,7 +99,7 @@ func (r *Memory) Ping() (string, error) {
 
 func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	for _, v := range batch {
-		r.memory = append(r.memory, v["short_url"]+" "+v["original_url"]+" "+v["uid"]+" "+"true")
+		r.memory = append(r.memory, eS{Short: v["short_url"], Original: v["original_url"], UID: v["uid"], Condition: true})
 	}
 	return nil
 }
@@ -111,9 +110,8 @@ func funnelm(m *Memory) {
 		uid := v.UID
 		for _, rd := range data {
 			for i, value := range m.memory {
-				var v = strings.Fields(value)
-				if uid == v[2] && rd == v[0] {
-					m.memory[i] = v[0] + " " + v[1] + " " + v[2] + " " + "false"
+				if uid == value.UID && rd == value.Short {
+					m.memory[i] = eS{Condition: false}
 				}
 			}
 		}
@@ -123,8 +121,7 @@ func funnelm(m *Memory) {
 
 func Delm(m *Memory) {
 	for i, value := range m.memory {
-		var v = strings.Fields(value)
-		if v[3] == "false" {
+		if value.Condition == false {
 			m.memory = append(m.memory[:i], m.memory[i+1:]...)
 		}
 	}

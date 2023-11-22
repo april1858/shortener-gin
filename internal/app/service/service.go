@@ -59,7 +59,8 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 		if err != nil {
 			return nil, err
 		}
-		answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+uid)
+		//answer = append(answer, hex.EncodeToString(b)+" "+v["original_url"]+" "+uid)
+		answer = append(answer, hex.EncodeToString(b))
 		mp["short_url"] = hex.EncodeToString(b)
 		mp["original_url"] = v["original_url"]
 		mp["uid"] = uid

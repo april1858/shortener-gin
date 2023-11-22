@@ -148,7 +148,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
-		v["short_url"] = config.BURL + strings.Fields(answer[i])[0]
+		v["short_url"] = config.BURL + answer[i]
 	}
 	answer1, err := json.Marshal(objQuery)
 
