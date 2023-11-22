@@ -114,7 +114,7 @@ func funnelm(m *Memory) {
 		for _, rd := range data {
 			for i, value := range m.memory {
 				if uid == value.UID && rd == value.Short {
-					m.memory[i] = eS{Condition: false}
+					m.memory[i] = eS{Short: value.Short, Original: value.Original, UID: value.UID, Condition: false}
 				}
 			}
 		}
