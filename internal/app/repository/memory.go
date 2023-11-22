@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
@@ -65,6 +66,7 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
+	fmt.Println("Find")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
@@ -79,6 +81,7 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 }
 
 func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
+	fmt.Println("FindByUID")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
