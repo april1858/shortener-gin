@@ -10,7 +10,6 @@ import (
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/entity"
-	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,9 +32,9 @@ type Endpoint struct {
 	s Service
 }
 
-var ch chan repository.S
+var ch chan entity.ChData
 
-func New(s Service, c chan repository.S) *Endpoint {
+func New(s Service, c chan entity.ChData) *Endpoint {
 	ch = c
 	return &Endpoint{
 		s: s,
@@ -63,14 +62,10 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
-			fmt.Println("!")
 			ctx.Data(http.StatusBadRequest, "text/plain", []byte(err.Error()))
-			return
 		}
 		if errors.Is(err, entity.ErrDeleted) {
-			fmt.Println("!!")
 			ctx.Data(http.StatusGone, "text/plain", []byte(err.Error()))
-			return
 		}
 		s := fmt.Sprintf("Ошибка - %v", err)
 		fmt.Println("S", s)
@@ -171,7 +166,7 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
-	st := repository.S{UID: uid, Data: remove}
+	st := entity.ChData{UID: uid, Data: remove}
 	go func() {
 		ch <- st
 	}()

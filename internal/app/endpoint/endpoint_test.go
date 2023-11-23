@@ -1,6 +1,5 @@
 package endpoint
 
-/*
 import (
 	"bytes"
 	"fmt"
@@ -8,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/april1858/shortener-gin/internal/app/config"
+	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
 	"github.com/gin-gonic/gin"
@@ -15,16 +16,23 @@ import (
 )
 
 func SetUpRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	return router
 }
 
 func TestCreateSortened(t *testing.T) {
-	rep := repository.New()
-	s := service.New(rep)
-	ep := New(s)
+	conf := config.New()
+	rep, ch, err := repository.New(conf)
+	if err != nil {
+		fmt.Println("error from repository", err)
+	}
+	service, ch := service.New(rep, ch)
+	endpoint := New(service, ch)
+	mw := middleware.New()
 	r := SetUpRouter()
-	r.POST("/", ep.CreateShortened)
+	r.Use(mw.Cookie(), mw.GZIP())
+	r.POST("/", endpoint.CreateShortened)
 
 	type want struct {
 		code        int
@@ -39,7 +47,7 @@ func TestCreateSortened(t *testing.T) {
 			name: "first",
 			want: want{
 				code:        201,
-				originalURL: "http://s-s.ru/123qweewqwe1313werfsw43we/ertfdsgsdfggfsdfgsdfgsdfgdgsdg",
+				originalURL: "http://asdfghh.ru/123qweewqwe1313werfsw43we/ertfdsgsdfggfsdfgsdfgsdfgdgsdg",
 			},
 		},
 		{
@@ -64,6 +72,7 @@ func TestCreateSortened(t *testing.T) {
 	}
 }
 
+/*
 func TestGetOriginalURL(t *testing.T) {
 
 	rep := repository.New()

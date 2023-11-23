@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
@@ -18,13 +17,6 @@ type Repository interface {
 	//Del(S)
 }
 
-type S struct {
-	UID  string
-	Data []string
-}
-
-//var memory = make([]string, 0)
-
 type eS entity.StoreElem
 
 type Memory struct {
@@ -32,9 +24,9 @@ type Memory struct {
 	memory []eS
 }
 
-var ch = make(chan S)
+var ch = make(chan entity.ChData)
 
-func New(c *config.Config) (Repository, chan S, error) {
+func New(c *config.Config) (Repository, chan entity.ChData, error) {
 	var r Repository
 	var err error
 	switch {
@@ -66,7 +58,6 @@ func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, err
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
-	fmt.Println("Find")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	for _, value := range r.memory {
@@ -81,7 +72,6 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 }
 
 func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
-	fmt.Println("FindByUID")
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)

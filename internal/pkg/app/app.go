@@ -5,6 +5,7 @@ import (
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
@@ -22,7 +23,7 @@ type App struct {
 
 func New() (*App, error) {
 	var err error
-	var ch chan repository.S
+	var ch chan entity.ChData
 	a := &App{}
 
 	a.config = config.New()

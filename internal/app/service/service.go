@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ type Service struct {
 
 //var ch chan repository.S
 
-func New(r repository.Repository, ch chan repository.S) (*Service, chan repository.S) {
+func New(r repository.Repository, ch chan entity.ChData) (*Service, chan entity.ChData) {
 	return &Service{
 		r: r,
 	}, ch
