@@ -17,11 +17,11 @@ type Repository interface {
 	//Del(S)
 }
 
-type eS entity.StoreElem
+type ES entity.StoreElem
 
 type Memory struct {
 	mx     sync.RWMutex
-	memory []eS
+	Memory []ES
 }
 
 var ch = make(chan entity.ChData)
@@ -45,22 +45,22 @@ func New(c *config.Config) (Repository, chan entity.ChData, error) {
 }
 
 func NewMemStorage() *Memory {
-	m := make([]eS, 0, 1)
-	p := &Memory{memory: m}
+	m := make([]ES, 0, 1)
+	p := &Memory{Memory: m}
 	go funnelm(p)
 	return p
 }
 func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.memory = append(r.memory, eS{Short: short, Original: original, UID: uid, Condition: true})
+	r.Memory = append(r.Memory, ES{Short: short, Original: original, UID: uid, Condition: true})
 	return "", nil
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	for _, value := range r.memory {
+	for _, value := range r.Memory {
 		if value.Short == short {
 			if !value.Condition {
 				return "", entity.ErrDeleted
@@ -75,7 +75,7 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
-	for _, value := range r.memory {
+	for _, value := range r.Memory {
 		if uid == value.UID {
 			answer = append(answer, value.Short+" "+value.Original)
 		}
@@ -92,7 +92,7 @@ func (r *Memory) Ping() (string, error) {
 
 func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	for _, v := range batch {
-		r.memory = append(r.memory, eS{Short: v["short_url"], Original: v["original_url"], UID: v["uid"], Condition: true})
+		r.Memory = append(r.Memory, ES{Short: v["short_url"], Original: v["original_url"], UID: v["uid"], Condition: true})
 	}
 	return nil
 }
@@ -102,9 +102,9 @@ func funnelm(m *Memory) {
 		data := v.Data
 		uid := v.UID
 		for _, rd := range data {
-			for i, value := range m.memory {
+			for i, value := range m.Memory {
 				if uid == value.UID && rd == value.Short {
-					m.memory[i] = eS{Short: value.Short, Original: value.Original, UID: value.UID, Condition: false}
+					m.Memory[i] = ES{Short: value.Short, Original: value.Original, UID: value.UID, Condition: false}
 				}
 			}
 		}
@@ -113,9 +113,9 @@ func funnelm(m *Memory) {
 }
 
 func Delm(m *Memory) {
-	for i, value := range m.memory {
+	for i, value := range m.Memory {
 		if !value.Condition {
-			m.memory = append(m.memory[:i], m.memory[i+1:]...)
+			m.Memory = append(m.Memory[:i], m.Memory[i+1:]...)
 		}
 	}
 }

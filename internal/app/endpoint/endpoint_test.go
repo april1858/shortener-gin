@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
@@ -18,22 +17,21 @@ import (
 func SetUpRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
+	rep := repository.NewMemStorage()
+	rep.Memory = append(rep.Memory, repository.ES{Short: "1234567", Original: "http://s-s.ru", UID: "1", Condition: true})
+	service, ch := service.New(rep, ch)
+	endpoint := New(service, ch)
+	mw := middleware.New()
+
+	router.Use(mw.Cookie(), mw.GZIP())
+	router.POST("/", endpoint.CreateShortened)
+	router.GET("/:id", endpoint.GetOriginalURL)
+
 	return router
 }
 
 func TestCreateSortened(t *testing.T) {
-	conf := config.New()
-	rep, ch, err := repository.New(conf)
-	if err != nil {
-		fmt.Println("error from repository", err)
-	}
-	service, ch := service.New(rep, ch)
-	endpoint := New(service, ch)
-	mw := middleware.New()
 	r := SetUpRouter()
-	r.Use(mw.Cookie(), mw.GZIP())
-	r.POST("/", endpoint.CreateShortened)
-
 	type want struct {
 		code        int
 		originalURL string
@@ -72,15 +70,9 @@ func TestCreateSortened(t *testing.T) {
 	}
 }
 
-/*
 func TestGetOriginalURL(t *testing.T) {
 
-	rep := repository.New()
-	(*rep).M["1234567"] = "http://s-s.ru"
-	s := service.New(rep)
-	ep := New(s)
 	r := SetUpRouter()
-	r.GET("/:id", ep.GetOriginalURL)
 
 	type want struct {
 		code         int
@@ -113,4 +105,3 @@ func TestGetOriginalURL(t *testing.T) {
 		})
 	}
 }
-*/
