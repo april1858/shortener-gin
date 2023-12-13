@@ -10,12 +10,12 @@ import (
 )
 
 func TestService_CreatorShortened(t *testing.T) {
-	var ctx *gin.Context = &gin.Context{}
+	ctx := &gin.Context{}
 	ctx.Set("UID", "1234567")
 	mockCtrl := gomock.NewController(t)
 	repo := repoMock.NewMockRepository(mockCtrl)
 
-	TestService_CreatorSh := &Service{r: repo}
+	TestServiceCreatorSh := &Service{r: repo}
 
 	tests := []struct {
 		name        string
@@ -29,7 +29,7 @@ func TestService_CreatorShortened(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo.EXPECT().Store(ctx, tt.originalURL, "1234567").Return(tt.short, tt.err)
-			TestService_CreatorSh.CreatorShortened(ctx, tt.originalURL)
+			TestServiceCreatorSh.CreatorShortened(ctx, tt.originalURL)
 		})
 	}
 

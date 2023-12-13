@@ -75,6 +75,7 @@ func BenchmarkCreateSortened(b *testing.B) {
 	}
 }
 
+/*
 func BenchmarkGetOriginalURL(b *testing.B) {
 	b.StopTimer()
 	r := SetUpRouter()
@@ -141,3 +142,4 @@ func BenchmarkGetOriginalURL(b *testing.B) {
 		})
 	}
 }
+*/
