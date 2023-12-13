@@ -14,8 +14,6 @@ type Service struct {
 	r repository.Repository
 }
 
-//var ch chan repository.S
-
 func New(r repository.Repository, ch chan entity.ChData) (*Service, chan entity.ChData) {
 	return &Service{
 		r: r,
@@ -24,15 +22,9 @@ func New(r repository.Repository, ch chan entity.ChData) (*Service, chan entity.
 
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
 	uid := ctx.MustGet("UID").(string)
-	b := make([]byte, 4)
-	_, err := rand.Read(b)
+	short, err := s.r.Store(ctx, originalURL, uid)
 	if err != nil {
-		return "", err
-	}
-	short := hex.EncodeToString(b)
-	shorter, err := s.r.Store(ctx, short, originalURL, uid)
-	if err != nil {
-		return shorter, err
+		return short, err
 	}
 	return short, nil
 }

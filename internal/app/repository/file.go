@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -21,11 +22,15 @@ func NewFileStorage(f string) *File {
 	return p
 }
 
-func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error) {
+func (f *File) Store(_ *gin.Context, original, uid string) (string, error) {
+	short, err := GetRand()
+	if err != nil {
+		fmt.Println("error from GetRand")
+	}
 	data := make([]string, 0, 1)
 	f.mx.Lock()
 	defer f.mx.Unlock()
-	_, err := os.Stat(f.filename)
+	_, err = os.Stat(f.filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			os.OpenFile(f.filename, os.O_CREATE, 0777)
@@ -48,7 +53,7 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 	if err != nil {
 		return "", err
 	}
-	return "", nil
+	return short, nil
 }
 
 func (f *File) Find(_ *gin.Context, short string) (string, error) {

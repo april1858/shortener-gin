@@ -1,7 +1,12 @@
 package repository
 
+//go:generate mockgen -build_flags=--mod=mod -destination mocks/postgres.go github.com/april1858/shortener-gin/internal/app/repository Repository
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"sync"
+
+	_ "github.com/golang/mock/mockgen/model"
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/entity"
@@ -9,7 +14,7 @@ import (
 )
 
 type Repository interface {
-	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
+	Store(ctx *gin.Context, originsl, uid string) (string, error)
 	Find(ctx *gin.Context, short string) (string, error)
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
@@ -50,11 +55,15 @@ func NewMemStorage() *Memory {
 	go funnelm(p)
 	return p
 }
-func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
+func (r *Memory) Store(_ *gin.Context, original, uid string) (string, error) {
+	short, err := GetRand()
+	if err != nil {
+		return "", err
+	}
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	r.Memory = append(r.Memory, ES{Short: short, Original: original, UID: uid, Condition: true})
-	return "", nil
+	return short, nil
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
@@ -118,4 +127,14 @@ func Delm(m *Memory) {
 			m.Memory = append(m.Memory[:i], m.Memory[i+1:]...)
 		}
 	}
+}
+
+func GetRand() (string, error) {
+	b := make([]byte, 4)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	short := hex.EncodeToString(b)
+	return short, nil
 }

@@ -57,7 +57,11 @@ func (d *DB) Ping() (string, error) {
 	return "Conn", nil
 }
 
-func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error) {
+func (d *DB) Store(ctx *gin.Context, original, uid string) (string, error) {
+	short, err := GetRand()
+	if err != nil {
+		fmt.Println("error from GetRand")
+	}
 	db := d.connPGS
 	if _, err := db.Exec(ctx, `insert into "shortener6" (uid, short_url, original_url) values ($1,$2,$3)`, uid, short, original); err != nil {
 		var pgxError *pgconn.PgError
@@ -73,7 +77,7 @@ func (d *DB) Store(ctx *gin.Context, short, original, uid string) (string, error
 			}
 		}
 	}
-	return "", nil
+	return short, nil
 }
 
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {

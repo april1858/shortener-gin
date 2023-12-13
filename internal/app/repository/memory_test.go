@@ -11,7 +11,7 @@ func BenchmarkStore(b *testing.B) {
 	var ctx *gin.Context
 	b.Run("store", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			r.Store(ctx, "a1234567", "http://a-a.ru", "123aaaa2")
+			r.Store(ctx, "http://a-a.ru", "123aaaa2")
 		}
 	})
 
