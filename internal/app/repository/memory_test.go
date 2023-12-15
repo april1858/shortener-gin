@@ -11,19 +11,19 @@ func BenchmarkStore(b *testing.B) {
 	var ctx *gin.Context
 	b.Run("store", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			r.Store(ctx, "http://a-a.ru", "123aaaa2")
+			r.Store(ctx, "http://abcd1234.ru", "1234abcd")
 		}
 	})
 
 	b.Run("find", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			r.Find(ctx, "a1234567")
+			r.Find(ctx, "1234abcd")
 		}
 	})
 
 	b.Run("findByUID", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			r.FindByUID(ctx, "a1234567")
+			r.FindByUID(ctx, "1234abcd")
 		}
 	})
 }

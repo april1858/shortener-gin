@@ -9,6 +9,7 @@ import (
 	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,6 +42,7 @@ func New() (*App, error) {
 
 	gin.SetMode(gin.ReleaseMode)
 	a.route = gin.Default()
+	pprof.Register(a.route)
 
 	a.route.Use(a.mw.Cookie(), a.mw.GZIP())
 	a.route.POST("/", a.endpoint.CreateShortened)

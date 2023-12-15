@@ -34,3 +34,29 @@ func TestService_CreatorShortened(t *testing.T) {
 	}
 
 }
+
+func TestService_FindOriginalURL(t *testing.T) {
+	ctx := &gin.Context{}
+	//ctx.Set("UID", "1234567")
+	mockCtrl := gomock.NewController(t)
+	repo := repoMock.NewMockRepository(mockCtrl)
+
+	TestServiceFindOriginal := &Service{r: repo}
+
+	tests := []struct {
+		name        string
+		originalURL string
+		short       string
+		err         error
+	}{
+		{name: "first", originalURL: "http://abcd1234.ru", short: "12345678", err: nil},
+		{name: "second", originalURL: "http://bcd1234.ru", short: "12345678", err: nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo.EXPECT().Find(ctx, tt.short).Return(tt.originalURL, tt.err)
+			TestServiceFindOriginal.FindOriginalURL(ctx, tt.short)
+		})
+	}
+
+}
