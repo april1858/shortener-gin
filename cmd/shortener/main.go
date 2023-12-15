@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/april1858/shortener-gin/internal/pkg/app"
 	"log"
+
+	"github.com/april1858/shortener-gin/internal/pkg/app"
 )
 
 func main() {

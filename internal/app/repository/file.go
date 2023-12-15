@@ -2,6 +2,7 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -21,11 +22,15 @@ func NewFileStorage(f string) *File {
 	return p
 }
 
-func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error) {
+func (f *File) Store(_ *gin.Context, original, uid string) (string, error) {
+	short, err := GetRand()
+	if err != nil {
+		fmt.Println("error from GetRand")
+	}
 	data := make([]string, 0, 1)
 	f.mx.Lock()
 	defer f.mx.Unlock()
-	_, err := os.Stat(f.filename)
+	_, err = os.Stat(f.filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			os.OpenFile(f.filename, os.O_CREATE, 0777)
@@ -34,7 +39,6 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 	} else {
 		content, err := os.ReadFile(f.filename)
 		if err != nil {
-			log.Println("error - ", err)
 			return "", err
 		}
 		json.Unmarshal(content, &data)
@@ -43,15 +47,13 @@ func (f *File) Store(_ *gin.Context, short, original, uid string) (string, error
 
 	out, err := json.Marshal(data)
 	if err != nil {
-		log.Println("error ", err)
 		return "", err
 	}
 	err = os.WriteFile(f.filename, out, 0644)
 	if err != nil {
-		log.Println("error ", err)
 		return "", err
 	}
-	return "", nil
+	return short, nil
 }
 
 func (f *File) Find(_ *gin.Context, short string) (string, error) {
@@ -59,7 +61,6 @@ func (f *File) Find(_ *gin.Context, short string) (string, error) {
 	defer f.mx.Unlock()
 	fileData, err := os.ReadFile(f.filename)
 	if err != nil {
-		log.Println("error ", err)
 		return "", err
 	}
 	parseData := []string{}
@@ -79,7 +80,6 @@ func (f *File) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	defer f.mx.Unlock()
 	fileData, err := os.ReadFile(f.filename)
 	if err != nil {
-		log.Println("error ", err)
 		return nil, err
 	}
 	parseData := []string{}
@@ -105,12 +105,10 @@ func (f *File) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	}
 	out, err := json.Marshal(data)
 	if err != nil {
-		log.Println("error ", err)
 		return err
 	}
 	err = os.WriteFile(f.filename, out, 0644)
 	if err != nil {
-		log.Println("error ", err)
 		return err
 	}
 	return nil

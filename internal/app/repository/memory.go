@@ -1,17 +1,20 @@
 package repository
 
+//go:generate mockgen -build_flags=--mod=mod -destination mocks/postgres.go github.com/april1858/shortener-gin/internal/app/repository Repository
 import (
-	"errors"
-	"fmt"
-	"strings"
+	"crypto/rand"
+	"encoding/hex"
 	"sync"
 
+	_ "github.com/golang/mock/mockgen/model"
+
 	"github.com/april1858/shortener-gin/internal/app/config"
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/gin-gonic/gin"
 )
 
 type Repository interface {
-	Store(ctx *gin.Context, short, originsl, uid string) (string, error)
+	Store(ctx *gin.Context, originsl, uid string) (string, error)
 	Find(ctx *gin.Context, short string) (string, error)
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
@@ -19,21 +22,16 @@ type Repository interface {
 	//Del(S)
 }
 
-type S struct {
-	UID  string
-	Data []string
-}
-
-//var memory = make([]string, 0)
+type ES entity.StoreElem
 
 type Memory struct {
 	mx     sync.RWMutex
-	memory []string
+	Memory []ES
 }
 
-var ch = make(chan S)
+var ch = make(chan entity.ChData)
 
-func New(c *config.Config) (Repository, chan S, error) {
+func New(c *config.Config) (Repository, chan entity.ChData, error) {
 	var r Repository
 	var err error
 	switch {
@@ -52,46 +50,47 @@ func New(c *config.Config) (Repository, chan S, error) {
 }
 
 func NewMemStorage() *Memory {
-	m := make([]string, 0, 1)
-	p := &Memory{memory: m}
+	m := make([]ES, 0, 1)
+	p := &Memory{Memory: m}
 	go funnelm(p)
-	fmt.Println("initm")
 	return p
 }
-func (r *Memory) Store(_ *gin.Context, short, original, uid string) (string, error) {
+func (r *Memory) Store(_ *gin.Context, original, uid string) (string, error) {
+	short, err := GetRand()
+	if err != nil {
+		return "", err
+	}
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	r.memory = append(r.memory, short+" "+original+" "+uid+" "+"true")
-	return "", nil
+	r.Memory = append(r.Memory, ES{Short: short, Original: original, UID: uid, Condition: true})
+	return short, nil
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
-	for _, value := range r.memory {
-		var v = strings.Fields(value)
-		if short == v[0] {
-			if v[3] == "false" {
-				return "deleted", nil
+	for _, value := range r.Memory {
+		if value.Short == short {
+			if !value.Condition {
+				return "", entity.ErrDeleted
 			}
-			return v[1], nil
+			return value.Original, nil
 		}
 	}
-	return "", nil
+	return "", entity.ErrNotFound
 }
 
 func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	answer := make([]string, 0, 4)
-	for _, value := range r.memory {
-		var v = strings.Fields(value)
-		if uid == v[2] {
-			answer = append(answer, v[0]+" "+v[1])
+	for _, value := range r.Memory {
+		if uid == value.UID {
+			answer = append(answer, value.Short+" "+value.Original)
 		}
 	}
 	if len(answer) == 0 {
-		return nil, errors.New("NOT")
+		return nil, entity.ErrNotFound
 	}
 	return answer, nil
 }
@@ -102,9 +101,8 @@ func (r *Memory) Ping() (string, error) {
 
 func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	for _, v := range batch {
-		r.memory = append(r.memory, v["short_url"]+" "+v["original_url"]+" "+v["uid"]+" "+"true")
+		r.Memory = append(r.Memory, ES{Short: v["short_url"], Original: v["original_url"], UID: v["uid"], Condition: true})
 	}
-	fmt.Println("r.memory = ", r.memory)
 	return nil
 }
 
@@ -113,10 +111,9 @@ func funnelm(m *Memory) {
 		data := v.Data
 		uid := v.UID
 		for _, rd := range data {
-			for i, value := range m.memory {
-				var v = strings.Fields(value)
-				if uid == v[2] && rd == v[0] {
-					m.memory[i] = v[0] + " " + v[1] + " " + v[2] + " " + "false"
+			for i, value := range m.Memory {
+				if uid == value.UID && rd == value.Short {
+					m.Memory[i] = ES{Short: value.Short, Original: value.Original, UID: value.UID, Condition: false}
 				}
 			}
 		}
@@ -125,10 +122,19 @@ func funnelm(m *Memory) {
 }
 
 func Delm(m *Memory) {
-	for i, value := range m.memory {
-		var v = strings.Fields(value)
-		if v[3] == "false" {
-			m.memory = append(m.memory[:i], m.memory[i+1:]...)
+	for i, value := range m.Memory {
+		if !value.Condition {
+			m.Memory = append(m.Memory[:i], m.Memory[i+1:]...)
 		}
 	}
+}
+
+func GetRand() (string, error) {
+	b := make([]byte, 4)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	short := hex.EncodeToString(b)
+	return short, nil
 }

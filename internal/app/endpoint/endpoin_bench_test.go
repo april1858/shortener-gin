@@ -2,7 +2,6 @@ package endpoint
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,11 +13,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func SetUpRouter() *gin.Engine {
+func SetUpRouterBench() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	rep := repository.NewMemStorage()
-	rep.Memory = append(rep.Memory, repository.ES{Short: "1234567", Original: "http://s-s.ru", UID: "1", Condition: true})
+	addMemory := []repository.ES{
+		{Short: "1234567", Original: "http://s-s1.ru", UID: "1", Condition: true},
+		{Short: "2345678", Original: "http://s-s2.ru", UID: "1", Condition: true},
+		{Short: "3456789", Original: "http://s-s3.ru./articles/go/testirovanie-http-hendlerov-v-go/", UID: "1", Condition: true},
+	}
+	rep.Memory = append(rep.Memory, addMemory...)
 	service, ch := service.New(rep, ch)
 	endpoint := New(service, ch)
 	mw := middleware.New()
@@ -30,7 +34,8 @@ func SetUpRouter() *gin.Engine {
 	return router
 }
 
-func TestCreateSortened(t *testing.T) {
+func BenchmarkCreateSortened(b *testing.B) {
+	b.StopTimer()
 	r := SetUpRouter()
 	type want struct {
 		code        int
@@ -56,22 +61,23 @@ func TestCreateSortened(t *testing.T) {
 			},
 		},
 	}
-
+	b.StartTimer()
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		b.Run(tt.name, func(b *testing.B) {
 
 			ms := []byte(tt.want.originalURL)
 			req, _ := http.NewRequest("POST", "/", bytes.NewBuffer(ms))
 
 			w := httptest.NewRecorder()
 			r.ServeHTTP(w, req)
-			assert.Equal(t, tt.want.code, w.Code)
+			assert.Equal(b, tt.want.code, w.Code)
 		})
 	}
 }
 
-func TestGetOriginalURL(t *testing.T) {
-
+/*
+func BenchmarkGetOriginalURL(b *testing.B) {
+	b.StopTimer()
 	r := SetUpRouter()
 
 	type want struct {
@@ -85,23 +91,55 @@ func TestGetOriginalURL(t *testing.T) {
 		want want
 	}{
 		{
-			name: "f1",
+			name: "test1",
 			want: want{
 				code:         307,
 				shortenedURL: "1234567",
-				originalURL:  "http://s-s.ru",
+				originalURL:  "http://s-s1.ru",
+			},
+		},
+		{
+			name: "test2",
+			want: want{
+				code:         307,
+				shortenedURL: "2345678",
+				originalURL:  "http://s-s2.ru",
+			},
+		},
+		{
+			name: "test3",
+			want: want{
+				code:         307,
+				shortenedURL: "3456789",
+				originalURL:  "http://s-s3.ru./articles/go/testirovanie-http-hendlerov-v-go/",
+			},
+		},
+		{
+			name: "test4",
+			want: want{
+				code:         404,
+				shortenedURL: "",
+				originalURL:  "",
+			},
+		},
+		{
+			name: "test5",
+			want: want{
+				code:         400,
+				shortenedURL: "1233456789",
+				originalURL:  "",
 			},
 		},
 	}
-
+	b.StartTimer()
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		b.Run(tt.name, func(b *testing.B) {
 			req, _ := http.NewRequest("GET", "/"+tt.want.shortenedURL, nil)
 			w := httptest.NewRecorder()
 			r.ServeHTTP(w, req)
-			fmt.Println(w.Header().Get("Location"))
-			assert.Equal(t, tt.want.code, w.Code)
-			assert.Equal(t, tt.want.originalURL, w.Header().Get("Location"))
+			assert.Equal(b, tt.want.code, w.Code)
+			assert.Equal(b, tt.want.originalURL, w.Header().Get("Location"))
 		})
 	}
 }
+*/

@@ -5,9 +5,11 @@ import (
 
 	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/endpoint"
+	"github.com/april1858/shortener-gin/internal/app/entity"
 	"github.com/april1858/shortener-gin/internal/app/middleware"
 	"github.com/april1858/shortener-gin/internal/app/repository"
 	"github.com/april1858/shortener-gin/internal/app/service"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,26 +24,25 @@ type App struct {
 
 func New() (*App, error) {
 	var err error
-	var ch chan repository.S
+	var ch chan entity.ChData
 	a := &App{}
 
 	a.config = config.New()
 
 	a.repository, ch, err = repository.New(a.config)
 	if err != nil {
-		fmt.Println("err Rep")
+		fmt.Println("error from repository", err)
 	}
 
 	a.service, ch = service.New(a.repository, ch)
-	if err != nil {
-		fmt.Println("DB error!")
-	}
+
 	a.endpoint = endpoint.New(a.service, ch)
 
 	a.mw = middleware.New()
 
 	gin.SetMode(gin.ReleaseMode)
 	a.route = gin.Default()
+	pprof.Register(a.route)
 
 	a.route.Use(a.mw.Cookie(), a.mw.GZIP())
 	a.route.POST("/", a.endpoint.CreateShortened)
