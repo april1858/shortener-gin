@@ -1,6 +1,6 @@
 module github.com/april1858/shortener-gin
 
-go 1.20
+go 1.21.5
 
 require (
 	github.com/gin-contrib/gzip v0.0.6
