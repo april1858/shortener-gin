@@ -129,6 +129,7 @@ func Delm(m *Memory) {
 	}
 }
 
+// GetRand() creates a random number and return as a string - shortURL
 func GetRand() (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
