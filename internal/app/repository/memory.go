@@ -13,6 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @ Try it now
+
 type Repository interface {
 	Store(ctx *gin.Context, originsl, uid string) (string, error)
 	Find(ctx *gin.Context, short string) (string, error)
