@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Config define
 type Config struct {
 	BaseURL         string
 	ServerAddress   string
