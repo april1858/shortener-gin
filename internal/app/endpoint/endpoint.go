@@ -1,3 +1,4 @@
+// Package endpoint for me.
 package endpoint
 
 import (
