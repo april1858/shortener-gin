@@ -22,6 +22,7 @@ type Repository interface {
 	//Del(S)
 }
 
+// @Type ES elements fo chanal.
 type ES entity.StoreElem
 
 type Memory struct {
