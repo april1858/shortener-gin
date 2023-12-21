@@ -13,15 +13,16 @@ type Config struct {
 	DatabaseDsn     string
 }
 
+// !
 var (
-	A = flag.String("a", "", "server_address")
-	B = flag.String("b", "", "base_url")
-	F = flag.String("f", "", "file_storage_path")
-	D = flag.String("d", "", "database_dsn")
+	A    = flag.String("a", "", "server_address")
+	B    = flag.String("b", "", "base_url")
+	F    = flag.String("f", "", "file_storage_path")
+	D    = flag.String("d", "", "database_dsn")
+	BURL string
 )
 
-var BURL string
-
+// !
 func New() *Config {
 
 	var address, baseurl, file, db string

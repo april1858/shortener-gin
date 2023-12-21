@@ -15,11 +15,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 type Redirect struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
 
+// !
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
@@ -29,12 +31,14 @@ type Service interface {
 	// Delete(*gin.Context, repository.S)
 }
 
+// !
 type Endpoint struct {
 	s Service
 }
 
 var ch chan entity.ChData
 
+// !
 func New(s Service, c chan entity.ChData) *Endpoint {
 	ch = c
 	return &Endpoint{
@@ -42,6 +46,7 @@ func New(s Service, c chan entity.ChData) *Endpoint {
 	}
 }
 
+// !
 func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	contentType := "text/plain"
 	var status int = http.StatusCreated
@@ -58,6 +63,7 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	}
 }
 
+// !
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
@@ -76,6 +82,7 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	}
 }
 
+// !
 func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 	sliceAll, err := e.s.FindByUID(ctx)
 	if err != nil {
@@ -99,6 +106,7 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 	}
 }
 
+// !
 func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 	var shortened string
 	var status int = http.StatusCreated
@@ -128,6 +136,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 	ctx.Data(status, "application/json", answer)
 }
 
+// !
 func (e *Endpoint) Ping(ctx *gin.Context) {
 	message, err := e.s.Ping()
 	if err != nil {
@@ -136,6 +145,7 @@ func (e *Endpoint) Ping(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, "", []byte(message))
 }
 
+// !
 func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	objQuery := make([]map[string]string, 0)
 	requestBody, _ := ctx.GetRawData()
@@ -159,6 +169,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
 }
 
+// !
 func (e *Endpoint) Delete(ctx *gin.Context) {
 	uid := ctx.MustGet("UID").(string)
 	remove := make([]string, 1)
