@@ -4,7 +4,6 @@ package repository
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"sync"
 
 	_ "github.com/golang/mock/mockgen/model"
@@ -29,9 +28,8 @@ type Repository interface {
 type ES entity.StoreElem
 
 type Memory struct {
-	mx      sync.RWMutex
-	Memory  []ES
-	baseURL string
+	mx     sync.RWMutex
+	Memory []ES
 }
 
 var ch = make(chan entity.ChData)
@@ -48,14 +46,15 @@ func New(c *config.Config) (Repository, chan entity.ChData, error) {
 	case c.FileStoragePath != "":
 		r = NewFileStorage(c.FileStoragePath)
 	default:
-		r = NewMemStorage(c.BaseURL)
+		r = NewMemStorage()
 	}
+
 	return r, ch, nil
 }
 
-func NewMemStorage(baseURL string) *Memory {
+func NewMemStorage() *Memory {
 	m := make([]ES, 0, 1)
-	p := &Memory{Memory: m, baseURL: baseURL}
+	p := &Memory{Memory: m}
 	go funnelm(p)
 	return p
 }
@@ -67,8 +66,7 @@ func (r *Memory) Store(_ *gin.Context, original, uid string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
 	r.Memory = append(r.Memory, ES{Short: short, Original: original, UID: uid, Condition: true})
-	fmt.Println("BaseURL - ", r.baseURL)
-	return r.baseURL + short, nil
+	return short, nil
 }
 
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
@@ -91,7 +89,7 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	answer := make([]string, 0, 4)
 	for _, value := range r.Memory {
 		if uid == value.UID {
-			answer = append(answer, value.Short+r.baseURL+" "+value.Original)
+			answer = append(answer, value.Short+" "+value.Original)
 		}
 	}
 	if len(answer) == 0 {

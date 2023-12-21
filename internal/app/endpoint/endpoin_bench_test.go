@@ -1,6 +1,5 @@
 package endpoint
 
-/*
 import (
 	"bytes"
 	"net/http"

@@ -20,6 +20,8 @@ var (
 	D = flag.String("d", "", "database_dsn")
 )
 
+var BURL string
+
 func New() *Config {
 
 	var address, baseurl, file, db string
@@ -41,9 +43,9 @@ func New() *Config {
 
 	if b == "" {
 		if *B == "" {
-			baseurl = "http://" + address + "/"
+			baseurl = "http://" + address
 		} else {
-			baseurl = *B + "/"
+			baseurl = *B
 		}
 	} else {
 		baseurl = b
@@ -60,5 +62,6 @@ func New() *Config {
 	} else {
 		file = f
 	}
-	return &Config{BaseURL: baseurl, ServerAddress: address, FileStoragePath: file, DatabaseDsn: db}
+	BURL = baseurl + "/"
+	return &Config{BaseURL: BURL, ServerAddress: address, FileStoragePath: file, DatabaseDsn: db}
 }
