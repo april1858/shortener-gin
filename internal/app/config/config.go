@@ -43,7 +43,7 @@ func New() *Config {
 		if *B == "" {
 			baseurl = "http://" + address + "/"
 		} else {
-			baseurl = *B
+			baseurl = *B + "/"
 		}
 	} else {
 		baseurl = b
