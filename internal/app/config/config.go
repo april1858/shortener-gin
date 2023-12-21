@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Config define
+// Config defines the config for server
 type Config struct {
 	BaseURL         string
 	ServerAddress   string
@@ -19,8 +19,6 @@ var (
 	F = flag.String("f", "", "file_storage_path")
 	D = flag.String("d", "", "database_dsn")
 )
-
-var BURL string
 
 func New() *Config {
 
@@ -43,7 +41,7 @@ func New() *Config {
 
 	if b == "" {
 		if *B == "" {
-			baseurl = "http://" + address
+			baseurl = "http://" + address + "/"
 		} else {
 			baseurl = *B
 		}
@@ -62,6 +60,5 @@ func New() *Config {
 	} else {
 		file = f
 	}
-	BURL = baseurl + "/"
-	return &Config{BaseURL: BURL, ServerAddress: address, FileStoragePath: file, DatabaseDsn: db}
+	return &Config{BaseURL: baseurl, ServerAddress: address, FileStoragePath: file, DatabaseDsn: db}
 }

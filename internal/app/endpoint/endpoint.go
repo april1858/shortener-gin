@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/april1858/shortener-gin/internal/app/config"
 	"github.com/april1858/shortener-gin/internal/app/entity"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +53,7 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 		if err != nil {
 			status = http.StatusConflict
 		}
-		ctx.Data(status, contentType, []byte(config.BURL+shortened))
+		ctx.Data(status, contentType, []byte(shortened))
 	}
 }
 
@@ -86,7 +85,7 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 		var r Redirect
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
-			r.ShortURL = config.BURL + v[0]
+			r.ShortURL = v[0]
 			r.OriginalURL = v[1]
 			redirect = append(redirect, r)
 		}
@@ -119,7 +118,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 		}
 	}
 
-	answerStruct := map[string]string{"result": config.BURL + shortened}
+	answerStruct := map[string]string{"result": shortened}
 	answer, err := json.Marshal(answerStruct)
 	if err != nil {
 		return
@@ -149,7 +148,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	}
 	for i, v := range objQuery {
 		delete(v, "original_url")
-		v["short_url"] = config.BURL + answer[i]
+		v["short_url"] = answer[i]
 	}
 	answer1, err := json.Marshal(objQuery)
 
