@@ -16,12 +16,6 @@ import (
 )
 
 // !
-type Redirect struct {
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
-}
-
-// !
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
@@ -89,8 +83,8 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
 	} else {
-		var redirect = make([]Redirect, 0, 1)
-		var r Redirect
+		var redirect = make([]entity.Redirect, 0, 1)
+		var r entity.Redirect
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
 			r.ShortURL = config.BURL + v[0]
@@ -178,9 +172,9 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
-	st := entity.ChData{UID: uid, Data: remove}
+	toCh := entity.ChData{UID: uid, Data: remove}
 	go func() {
-		ch <- st
+		ch <- toCh
 	}()
 	ctx.Data(http.StatusAccepted, "application/json", []byte("{\"OK\"}"))
 }
