@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 type App struct {
 	endpoint   *endpoint.Endpoint
 	repository repository.Repository
@@ -22,6 +23,7 @@ type App struct {
 	mw         *middleware.MW
 }
 
+// !
 func New() (*App, error) {
 	var err error
 	var ch chan entity.ChData
@@ -56,6 +58,7 @@ func New() (*App, error) {
 	return a, nil
 }
 
+// !
 func (a *App) Run() error {
 	fmt.Println("server running")
 	a.route.Run(a.config.ServerAddress)

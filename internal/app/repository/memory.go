@@ -26,6 +26,7 @@ type Repository interface {
 // @Type ES elements fo chanal.
 type ES entity.StoreElem
 
+// !
 type Memory struct {
 	mx     sync.RWMutex
 	Memory []ES
@@ -33,6 +34,7 @@ type Memory struct {
 
 var ch = make(chan entity.ChData)
 
+// !
 func New(c *config.Config) (Repository, chan entity.ChData, error) {
 	var r Repository
 	var err error
@@ -51,12 +53,15 @@ func New(c *config.Config) (Repository, chan entity.ChData, error) {
 	return r, ch, nil
 }
 
+// !
 func NewMemStorage() *Memory {
 	m := make([]ES, 0, 1)
 	p := &Memory{Memory: m}
 	go funnelm(p)
 	return p
 }
+
+// !
 func (r *Memory) Store(_ *gin.Context, original, uid string) (string, error) {
 	short, err := GetRand()
 	if err != nil {
@@ -68,6 +73,7 @@ func (r *Memory) Store(_ *gin.Context, original, uid string) (string, error) {
 	return short, nil
 }
 
+// !
 func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
@@ -82,6 +88,7 @@ func (r *Memory) Find(_ *gin.Context, short string) (string, error) {
 	return "", entity.ErrNotFound
 }
 
+// !
 func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	r.mx.Lock()
 	defer r.mx.Unlock()
@@ -97,10 +104,12 @@ func (r *Memory) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	return answer, nil
 }
 
+// !
 func (r *Memory) Ping() (string, error) {
 	return "Yes! Ping from Memory\n", nil
 }
 
+// !
 func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	for _, v := range batch {
 		r.Memory = append(r.Memory, ES{Short: v["short_url"], Original: v["original_url"], UID: v["uid"], Condition: true})
@@ -108,6 +117,7 @@ func (r *Memory) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	return nil
 }
 
+// !
 func funnelm(m *Memory) {
 	for v := range ch {
 		data := v.Data
@@ -123,6 +133,7 @@ func funnelm(m *Memory) {
 	Delm(m)
 }
 
+// !
 func Delm(m *Memory) {
 	for i, value := range m.Memory {
 		if !value.Condition {
@@ -131,6 +142,7 @@ func Delm(m *Memory) {
 	}
 }
 
+// !
 func GetRand() (string, error) {
 	b := make([]byte, 4)
 	_, err := rand.Read(b)
