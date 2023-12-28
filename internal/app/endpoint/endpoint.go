@@ -15,24 +15,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// !
+// Methods available in the Service
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
-	// Delete(*gin.Context, repository.S)
 }
 
-// !
+// Endpoint contains methods that implement tasks for available endpoints
 type Endpoint struct {
 	s Service
 }
 
 var ch chan entity.ChData
 
-// !
+// Constructor
 func New(s Service, c chan entity.ChData) *Endpoint {
 	ch = c
 	return &Endpoint{
@@ -40,7 +39,7 @@ func New(s Service, c chan entity.ChData) *Endpoint {
 	}
 }
 
-// !
+// CreateShortened() returns a shortened URL or an error
 func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	contentType := "text/plain"
 	var status int = http.StatusCreated
@@ -57,7 +56,7 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	}
 }
 
-// !
+// GetOriginalURL() returns the original URL or an error
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
@@ -172,9 +171,9 @@ func (e *Endpoint) Delete(ctx *gin.Context) {
 	if err := json.Unmarshal(requestBody, &remove); err != nil {
 		ctx.Data(http.StatusBadRequest, "application/json", []byte("{\"error\":"+err.Error()+"}"))
 	}
-	toCh := entity.ChData{UID: uid, Data: remove}
+	st := entity.ChData{UID: uid, Data: remove}
 	go func() {
-		ch <- toCh
+		ch <- st
 	}()
 	ctx.Data(http.StatusAccepted, "application/json", []byte("{\"OK\"}"))
 }

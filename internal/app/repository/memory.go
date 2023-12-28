@@ -14,14 +14,13 @@ import (
 )
 
 // @ Try it now
-
+// Methods available in the Repository
 type Repository interface {
-	Store(ctx *gin.Context, originsl, uid string) (string, error)
-	Find(ctx *gin.Context, short string) (string, error)
+	Store(*gin.Context, string, string) (string, error)
+	Find(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context, string) ([]string, error)
 	StoreBatch(*gin.Context, []map[string]string) error
 	Ping() (string, error)
-	//Del(S)
 }
 
 // @Type ES elements fo chanal.
