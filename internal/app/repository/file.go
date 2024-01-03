@@ -104,6 +104,7 @@ func (f *File) Ping() (string, error) {
 	return "Yes! Ping from File\n", nil
 }
 
+// !
 func (f *File) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	data := make([]string, 0, 1)
 	for _, v := range batch {
@@ -151,6 +152,7 @@ func funnelf(f *File) {
 	Delf(f, data)
 }
 
+// !
 func Delf(f *File, data []string) {
 
 	for i, value := range data {
