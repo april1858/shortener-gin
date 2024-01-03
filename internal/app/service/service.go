@@ -10,16 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 type Service struct {
 	r repository.Repository
 }
 
+// !
 func New(r repository.Repository, ch chan entity.ChData) (*Service, chan entity.ChData) {
 	return &Service{
 		r: r,
 	}, ch
 }
 
+// !
 func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string, error) {
 	uid := ctx.MustGet("UID").(string)
 	short, err := s.r.Store(ctx, originalURL, uid)
@@ -29,11 +32,13 @@ func (s *Service) CreatorShortened(ctx *gin.Context, originalURL string) (string
 	return short, nil
 }
 
+// !
 func (s *Service) FindOriginalURL(ctx *gin.Context, shortened string) (string, error) {
 	answer, err := s.r.Find(ctx, shortened)
 	return answer, err
 }
 
+// !
 func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
 	uid := ctx.MustGet("UID").(string)
 	answer, err := s.r.FindByUID(ctx, uid)
@@ -41,6 +46,7 @@ func (s *Service) FindByUID(ctx *gin.Context) ([]string, error) {
 	return answer, err
 }
 
+// !
 func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]string) ([]string, error) {
 	answer := make([]string, 0, 2)
 	toDB := make([]map[string]string, 0)
@@ -66,6 +72,7 @@ func (s *Service) CreatorShortenedBatch(ctx *gin.Context, batch []map[string]str
 	return answer, nil
 }
 
+// !
 func (s *Service) Ping() (string, error) {
 	answer, err := s.r.Ping()
 	return answer, err

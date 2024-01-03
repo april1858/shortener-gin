@@ -11,17 +11,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 type File struct {
 	mx       sync.RWMutex
 	filename string
 }
 
+// !
 func NewFileStorage(f string) *File {
 	p := &File{filename: f}
 	go funnelf(p)
 	return p
 }
 
+// !
 func (f *File) Store(_ *gin.Context, original, uid string) (string, error) {
 	short, err := GetRand()
 	if err != nil {
@@ -56,6 +59,7 @@ func (f *File) Store(_ *gin.Context, original, uid string) (string, error) {
 	return short, nil
 }
 
+// !
 func (f *File) Find(_ *gin.Context, short string) (string, error) {
 	f.mx.Lock()
 	defer f.mx.Unlock()
@@ -75,6 +79,7 @@ func (f *File) Find(_ *gin.Context, short string) (string, error) {
 	return "", nil
 }
 
+// !
 func (f *File) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	f.mx.Lock()
 	defer f.mx.Unlock()
@@ -94,10 +99,12 @@ func (f *File) FindByUID(_ *gin.Context, uid string) ([]string, error) {
 	return answer, nil
 }
 
+// !
 func (f *File) Ping() (string, error) {
 	return "Yes! Ping from File\n", nil
 }
 
+// !
 func (f *File) StoreBatch(_ *gin.Context, batch []map[string]string) error {
 	data := make([]string, 0, 1)
 	for _, v := range batch {
@@ -145,6 +152,7 @@ func funnelf(f *File) {
 	Delf(f, data)
 }
 
+// !
 func Delf(f *File, data []string) {
 
 	for i, value := range data {

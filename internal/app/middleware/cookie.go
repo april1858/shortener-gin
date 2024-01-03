@@ -12,12 +12,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 var (
 	ErrValueTooLong = errors.New("cookie value too long")
 	ErrInvalidValue = errors.New("invalid cookie value")
 	secretKey       = []byte("12345")
 )
 
+// !
 func (mw *MW) Cookie() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if signedValue, err := c.Cookie("UID"); err == nil {
@@ -40,6 +42,7 @@ func (mw *MW) Cookie() gin.HandlerFunc {
 	}
 }
 
+// !
 func ReadSigned(sValue string) (string, error) {
 	signedValue, err := base64.URLEncoding.DecodeString(sValue)
 	if err != nil {
@@ -69,6 +72,7 @@ func ReadSigned(sValue string) (string, error) {
 	return string(value), nil
 }
 
+// !
 func WriteSigned(name string) (string, string, error) {
 	uid, err := createCode()
 	if err != nil {

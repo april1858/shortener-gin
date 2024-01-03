@@ -1,3 +1,4 @@
+// Package endpoint for me.
 package endpoint
 
 import (
@@ -14,26 +15,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Redirect struct {
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
-}
-
+// Methods available in the Service
 type Service interface {
 	CreatorShortened(*gin.Context, string) (string, error)
 	FindOriginalURL(*gin.Context, string) (string, error)
 	FindByUID(*gin.Context) ([]string, error)
 	Ping() (string, error)
 	CreatorShortenedBatch(*gin.Context, []map[string]string) ([]string, error)
-	// Delete(*gin.Context, repository.S)
 }
 
+// Endpoint contains methods that implement tasks for available endpoints
 type Endpoint struct {
 	s Service
 }
 
 var ch chan entity.ChData
 
+// Constructor
 func New(s Service, c chan entity.ChData) *Endpoint {
 	ch = c
 	return &Endpoint{
@@ -41,6 +39,7 @@ func New(s Service, c chan entity.ChData) *Endpoint {
 	}
 }
 
+// CreateShortened() returns a shortened URL or an error
 func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	contentType := "text/plain"
 	var status int = http.StatusCreated
@@ -57,6 +56,7 @@ func (e *Endpoint) CreateShortened(ctx *gin.Context) {
 	}
 }
 
+// GetOriginalURL() returns the original URL or an error
 func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	shortened := ctx.Param("id")
 	answer, err := e.s.FindOriginalURL(ctx, shortened)
@@ -75,14 +75,15 @@ func (e *Endpoint) GetOriginalURL(ctx *gin.Context) {
 	}
 }
 
+// !
 func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 	sliceAll, err := e.s.FindByUID(ctx)
 	if err != nil {
 		s := fmt.Sprintf("Ошибка - %v", err)
 		ctx.Data(http.StatusNoContent, "text/plain application/json", []byte(s))
 	} else {
-		var redirect = make([]Redirect, 0, 1)
-		var r Redirect
+		var redirect = make([]entity.Redirect, 0, 1)
+		var r entity.Redirect
 		for _, value := range sliceAll {
 			var v = strings.Fields(value)
 			r.ShortURL = config.BURL + v[0]
@@ -98,6 +99,7 @@ func (e *Endpoint) GetAllUID(ctx *gin.Context) {
 	}
 }
 
+// !
 func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 	var shortened string
 	var status int = http.StatusCreated
@@ -127,6 +129,7 @@ func (e *Endpoint) JSONCreateShortened(ctx *gin.Context) {
 	ctx.Data(status, "application/json", answer)
 }
 
+// !
 func (e *Endpoint) Ping(ctx *gin.Context) {
 	message, err := e.s.Ping()
 	if err != nil {
@@ -135,6 +138,7 @@ func (e *Endpoint) Ping(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, "", []byte(message))
 }
 
+// !
 func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	objQuery := make([]map[string]string, 0)
 	requestBody, _ := ctx.GetRawData()
@@ -158,6 +162,7 @@ func (e *Endpoint) CreateShortenedBatch(ctx *gin.Context) {
 	ctx.Data(http.StatusCreated, "application/json", []byte(answer1))
 }
 
+// !
 func (e *Endpoint) Delete(ctx *gin.Context) {
 	uid := ctx.MustGet("UID").(string)
 	remove := make([]string, 1)

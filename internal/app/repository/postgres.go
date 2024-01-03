@@ -12,11 +12,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// !
 type DB struct {
 	connPGS *pgxpool.Pool
 	db      string
 }
 
+// !
 func NewDBStorage(db string) (*DB, error) {
 	ctx := new(gin.Context)
 	var conn *pgxpool.Pool
@@ -40,6 +42,7 @@ func NewDBStorage(db string) (*DB, error) {
 	}, nil
 }
 
+// !
 func (d *DB) Ping() (string, error) {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, d.db)
@@ -57,6 +60,7 @@ func (d *DB) Ping() (string, error) {
 	return "Conn", nil
 }
 
+// !
 func (d *DB) Store(ctx *gin.Context, original, uid string) (string, error) {
 	short, err := GetRand()
 	if err != nil {
@@ -80,6 +84,7 @@ func (d *DB) Store(ctx *gin.Context, original, uid string) (string, error) {
 	return short, nil
 }
 
+// !
 func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	var a1 string
 	var a2 bool
@@ -94,6 +99,7 @@ func (d *DB) Find(ctx *gin.Context, short string) (string, error) {
 	return a1, nil
 }
 
+// !
 func (d *DB) FindByUID(ctx *gin.Context, uid string) ([]string, error) {
 	answer := make([]string, 0, 1)
 	db := d.connPGS
@@ -113,6 +119,7 @@ func (d *DB) FindByUID(ctx *gin.Context, uid string) ([]string, error) {
 	return answer, nil
 }
 
+// !
 func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	db := d.connPGS
 	query := `INSERT INTO shortener6 (uid, short_url, original_url) VALUES (@uid, @short_url, @original_url)`
@@ -129,6 +136,7 @@ func (d *DB) StoreBatch(ctx *gin.Context, bulks []map[string]string) error {
 	return results.Close()
 }
 
+// !
 func funnel(conn *pgxpool.Pool) {
 	for v := range ch {
 		_, err := conn.Exec(context.TODO(), `UPDATE "shortener6" SET condition = false WHERE uid = $1 AND short_url = ANY($2)`, v.UID, v.Data)
@@ -139,6 +147,7 @@ func funnel(conn *pgxpool.Pool) {
 	Del(conn)
 }
 
+// !
 func Del(conn *pgxpool.Pool) {
 
 	_, err := conn.Exec(context.TODO(), `DELETE FROM shortener6 WHERE condition = false`)

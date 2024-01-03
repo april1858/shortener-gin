@@ -7,13 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// !
 type MW struct {
 }
 
+// !
 func New() *MW {
 	return &MW{}
 }
 
+// !
 func (mw *MW) GZIP() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader("Content-Encoding") == "gzip" {
